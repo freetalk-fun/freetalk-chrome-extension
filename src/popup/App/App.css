@@ -1,0 +1,11 @@
+.App {
+  color: rgb(0, 0, 0);
+  text-align: center;
+}
+
+.container {
+  padding: 20px;
+  width: 400px;
+  max-height: 500px;
+  background-color: rgb(217, 255, 217);
+}
