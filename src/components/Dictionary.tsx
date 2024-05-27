@@ -1,33 +1,18 @@
-import axios from "axios";
 import React, { useState } from "react";
-
-type Meaning = {
-  definition: string;
-  pos: string;
-};
-
-type DictionaryAPIResponse = {
-  term: string;
-  meanings: Meaning[];
-};
+import { DictionaryAPIResponse, getMeaning } from "../helpers/freeTalkAPI";
 
 function Dictionary() {
-  const [searchWord, setSearchWord] = useState<String>("");
+  const [searchWord, setSearchWord] = useState<string>("");
   const [dictionaryResponse, setDictionaryResponse] =
     useState<DictionaryAPIResponse>();
 
   const handleSubmit = async () => {
     try {
-      const result = await axios.get<DictionaryAPIResponse>(
-        `https://api.freetalk.fun/search-term?term=${searchWord}`,
-        {
-          headers: {
-            "auth-token": "my-secret-token",
-          },
-        }
-      );
-      console.log(result.data);
-      setDictionaryResponse(result.data);
+      const result = await getMeaning(searchWord);
+      console.log(result);
+      if(result){
+        setDictionaryResponse(result as unknown as DictionaryAPIResponse);
+      }
     } catch (error) {
       console.log(error);
     }

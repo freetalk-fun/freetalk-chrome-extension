@@ -1,28 +1,18 @@
 /* eslint-disable no-restricted-globals */
-import { action, runtime, scripting, tabs, windows } from 'webextension-polyfill'
+import * as browser from 'webextension-polyfill'
+import { getMeaning } from '../helpers/freeTalkAPI';
 
-runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(() => {
     // Initialize message listener
-    runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message.action === "openPopup") {
+    browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+      if (message.type === "openPopup") {
         // Open popup
-        windows.create({
-            type: "popup",
-            url: 'index.html',
-            width: 300,
-            height: 300,
-            top: Math.round(window.screen.height / 2 - 150),
-            left: Math.round(window.screen.width / 2 - 150),
-        })
+        console.log("ACTION CALLED", message.payload.text);
+        console.log(await browser.windows.getAll());
+        const result = await getMeaning(message.payload.text);
+        console.log(result);
+        return result;
       }
-    });
-    tabs.onActivated.addListener(async (tab) => {
-      const tabId = tab.tabId;
-      // Execute content script in the active tab
-      await scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['./static/js/content.js']
-      });
     });
   });
 

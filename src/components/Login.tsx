@@ -1,4 +1,5 @@
 import React from "react";
+import "../popup/index.css";
 
 type LoginPros = {
   handleLogin: () => void;
