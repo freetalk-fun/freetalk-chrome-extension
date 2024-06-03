@@ -15,3 +15,33 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+@font-face {
+  font-family: 'Product-Nor';
+  src: url('../../public/norwester.otf');
+}
+@font-face {
+  font-family: 'Product-Brand';
+  src: url('../../public/Brandon-font/Brandon_reg.otf');
+}
+
+@font-face {
+  font-family: 'Product-Brand';
+  src: url('../../public/Brandon-font/Brandon_bld.otf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Product-Brand-Medium';
+  src: url('../../public/Brandon-font/Brandon_med.otf');
+}
+@font-face {
+  font-family: 'Product-Brand-Thin';
+  src: url('../../public/Brandon-font/Brandon_thin.otf');
+}
+@font-face {
+  font-family: 'Product-Brand';
+  src: url('../../public/Brandon-font/Brandon_bld.otf');
+  font-weight: medium;
+}
+
+

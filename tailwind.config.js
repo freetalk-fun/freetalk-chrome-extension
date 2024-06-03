@@ -5,6 +5,12 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    fontFamily: {
+     "Nor":["Product-Nor"],
+     "Brand-reg":["Product-Brand"],
+     "Brnad-thin":["Product-Brand-Thin"],
+     "Brnad-medium":["Product-Brand-Medium"]
+    }
   },
   plugins: [],
 }
