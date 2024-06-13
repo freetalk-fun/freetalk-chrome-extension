@@ -8,8 +8,8 @@ module.exports = {
     fontFamily: {
      "Nor":["Product-Nor"],
      "Brand-reg":["Product-Brand"],
-     "Brnad-thin":["Product-Brand-Thin"],
-     "Brnad-medium":["Product-Brand-Medium"]
+     "Brand-thin":["Product-Brand-Thin"],
+     "Brand-medium":["Product-Brand-Medium"]
     }
   },
   plugins: [],

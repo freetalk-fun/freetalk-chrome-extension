@@ -1,4 +1,6 @@
 import { DictionaryAPIResponse } from "./freeTalkAPI";
+import next from "../../src/nextarrow.png"
+import prev from "../../src/prevarrow.png"
 
 export function generateTooltipContent(
   data: DictionaryAPIResponse | null | undefined,
@@ -37,6 +39,7 @@ export function generateTooltipContentOld(
 ) {
   if (!data) return ``;
   let content = "";
+  let meaningsHTML = "";
   if (data.message) {
     content = `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">"${selectedText}" is not in the FreeTalk Dictionary</div>`;
   }
@@ -46,13 +49,33 @@ export function generateTooltipContentOld(
     ${term.charAt(0).toUpperCase() + term.slice(1)}
   </h3>`;
   }
-  if (meanings && meanings[0]) {
-    content += `
-        <p style="font-weight: 450; font-size: 16px; color: black; margin: 0;"><b style="color: black;">POS:</b> ${meanings[0].pos}</p>
-        <h4 style="font-size: 16px; color: black; margin: 0; font-weight: 700;">Explanation</h4>
-        <p style="text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0;">${meanings[0].definition}</p>`;
+  if (meanings) {
+    meanings.forEach((meaning,index)=>{
+      meaningsHTML += `
+          <div class="carousel__photo ${index === 0 ? "": ""}" >
+            <div  style="display:flex; justify-content: space-between; font-family: 'Product-Brand-Grotesque-Regular'; font-weight:700;">
+              ${content}
+              <p class="elementToFadeInAndOut fade-in" style="font-size: 16px; color: black; margin: 0; font-family: 'Product-Brand-Grotesque-Regular'; font-weight:700;">${meaning.pos}</p>
+            </div>
+            <p class="content elementToFadeInAndOut fade-in" style=" font-family: 'Product-Brand-Grotesque-Light';text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
+          </div>`;
+    })
   }
-  return `<div>
-    ${content}
+  return `<div class="carousel-wrapper">
+    <div class="carousel">
+      ${meaningsHTML}
+      <div style="display: flex; justify-content: center; align-items:center; position: relative; gap:10px; margin-top:10px;" >
+      ${meanings && meanings.length > 1 ? `
+        <div class="carousel__button--prev"><img src="${prev}" /></div>
+          <div style="display: flex; gap:10px;">
+            ${meanings.map((_, index)=>`<div class="dot ${index === 0 ? "active": ""}"></div>`).join('')}
+          </div>
+        <div class="carousel__button--next"><img src="${next}"/></div>
+        ` :""}
+      </div>
+    </div>
   </div>`;
+  // return `<div>
+  //   ${content}
+  // </div>`;
 }

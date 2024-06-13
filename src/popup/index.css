@@ -44,4 +44,24 @@ code {
   font-weight: medium;
 }
 
+@font-face {
+  font-family: 'Product-Brand-Grotesque-Light';
+  src: url('../../public/Brandon-font/Brandon_Grotesque_Web_Light.ttf');
+}
+
+@font-face {
+  font-family: 'Product-Brand-Grotesque-Regular';
+  src: url('../../public/Brandon-font/Brandon_Grotesque_Web_Regular.ttf');
+}
+@font-face {
+  font-family: 'Product-Brand-Grotesque-Regular';
+  src: url('../../public/Brandon-font/Brandon_Grotesque_Web_Regular.ttf');
+  font-weight: bold;
+}
+@font-face {
+  font-family: 'Product-Brand-Grotesque-Regular';
+  src: url('../../public/Brandon-font/Brandon_Grotesque_Web_Regular.ttf');
+  font-weight: medium;
+}
+
 

@@ -9,16 +9,21 @@
     "128": "favicon2.png"
   },
   "background": {
-    "service_worker": "./static/js/background.js"
+    "service_worker": "./static/js/background.js",
+    "script": ["browser-polyfill.js"]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["./static/js/content.js"]
+      "js": ["./static/js/content.js"],
+      "script": ["browser-polyfill.js"]
     }
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["storage", "tabs"]
+  "permissions": ["storage", "tabs", "scripting"]
 }
