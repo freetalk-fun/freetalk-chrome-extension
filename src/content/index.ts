@@ -4,11 +4,6 @@ import { generateTooltipContentOld } from "../helpers/generateTooltipContent";
 
 const freetalkClass = document.createElement("style");
 const sliderScript = document.createElement("script");
-// const fontUrl = browser.runtime.getURL('public/Brandon-font/Brandon_Grotesque_Web_Bold.ttf')
-
-sliderScript.textContent = 'console.log("CALEED")';
-
-// document.querySelector("head")?.appendChild(sliderScript);
 
 const rules = `
     .tippy-box[data-theme="freetalk"] {
@@ -212,19 +207,15 @@ function disableInteraction() {
 }
 
 function moveCarouselTo(slide: number) {
-  console.log("Called", slide);
   // Check if carousel is moving, if not, allow interaction
   if (!moving) {
     // temporarily disable interactivity
     disableInteraction();
     // Update the "old" adjacent slides with "new" ones
-    console.log("Moving!");
     var newPrevious = slide - 1,
       newNext = slide + 1,
       oldPrevious = slide - 2 < 0 ? 0 : slide - 2,
       oldNext = slide + 2 >= totalItems ? totalItems - 1 : slide + 2;
-    console.log({ oldPrevious, oldNext, newPrevious, newNext, slide });
-
     // Test if carousel has more than three items
     if (totalItems > 1) {
       // Checks and updates if the new slides are out of bounds
@@ -233,7 +224,6 @@ function moveCarouselTo(slide: number) {
       } else if (newNext >= totalItems - 1) {
         oldNext = 0;
       }
-      console.log({ oldPrevious, oldNext, newPrevious, newNext, slide });
 
       // Checks and updates if slide is at the beginning/end
       if (slide === 0) {
@@ -248,8 +238,6 @@ function moveCarouselTo(slide: number) {
       // Now we've worked out where we are and where we're going,
       // by adding/removing classes we'll trigger the transitions.
       // Reset old next/prev elements to default classes
-      console.log(items);
-      console.log({ oldPrevious, oldNext, newPrevious, newNext, slide });
       items[oldPrevious].className = itemClassName;
       items[oldNext].className = itemClassName;
       // Add new classes
@@ -275,7 +263,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   const selection = document.getSelection();
   const selectedText = document.getSelection()?.toString().trim();
 
-  console.log("Called", event, selection);
   const targetElement = event.target;
 
   if (
@@ -290,11 +277,9 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       freetalkClass.appendChild(document.createTextNode(rules));
     }
 
-    console.log(freetalkClass);
     document.body.appendChild(freetalkClass);
     //@ts-ignore
     const innerHTML = targetElement.innerHTML;
-    console.log(innerHTML);
     const highlightedHTML = innerHTML.replace(
       new RegExp(`(${selectedText})`, "gi"),
       '<span id="tooltip" style="width:auto;">$1</span>'
@@ -307,7 +292,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
         text: selectedText,
       },
     });
-    console.log(data);
 
     const instance = tippy("#tooltip", {
       content: generateTooltipContentOld(data, selectedText),

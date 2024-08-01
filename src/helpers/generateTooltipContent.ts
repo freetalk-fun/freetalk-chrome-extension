@@ -41,7 +41,7 @@ export function generateTooltipContentOld(
   let content = "";
   let meaningsHTML = "";
   if (data.message) {
-    content = `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">"${selectedText}" is not in the FreeTalk Dictionary</div>`;
+    return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">"${selectedText}" is not in the FreeTalk Dictionary</div>`;
   }
   const { term, meanings } = data;
   if (term) {

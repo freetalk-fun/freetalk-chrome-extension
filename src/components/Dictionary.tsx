@@ -9,7 +9,6 @@ function Dictionary() {
   const handleSubmit = async () => {
     try {
       const result = await getMeaning(searchWord);
-      console.log(result);
       if(result){
         setDictionaryResponse(result as unknown as DictionaryAPIResponse);
       }

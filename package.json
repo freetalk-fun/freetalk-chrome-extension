@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@directus/sdk": "^16.1.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.267",
+    "@types/js-cookie": "^3.0.6",
     "@types/webextension-polyfill": "^0.10.7",
     "autoprefixer": "^10.4.19",
     "cross-env": "^7.0.3",
