@@ -4,6 +4,7 @@ import eye from "../eye.svg";
 import eyeClose from "../eye-close.svg";
 import { createDirectus, rest, authentication, login } from "@directus/sdk";
 import { DIRECTUS_URL } from "../environment";
+import * as browsers from 'webextension-polyfill'
 
 type LoginPros = {
   handleLogin: () => void;
@@ -65,6 +66,7 @@ function Login({
         setError("");
         handleLogin();
         localStorage.setItem("token", result.access_token);
+        await browsers.storage.local.set({token:result.access_token})
         handleDetails(email);
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
