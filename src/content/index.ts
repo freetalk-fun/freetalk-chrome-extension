@@ -142,16 +142,16 @@ let dots = document.getElementsByClassName(dotsClassName);
 function setInitialClasses() {
   // Targets the previous, current, and next items
   // This assumes there are at least three items.
-  items[totalItems - 1].classList.add("prev");
-  items[0].classList.add("active");
-  items[1].classList.add("next");
+  items[totalItems - 1]?.classList.add("prev");
+  items[0]?.classList.add("active");
+  items[1]?.classList.add("next");
 }
 // Set event listeners
 function setEventListeners() {
   let next = document.getElementsByClassName("carousel__button--next")[0],
     prev = document.getElementsByClassName("carousel__button--prev")[0];
-  next.addEventListener("click", moveNext);
-  prev.addEventListener("click", movePrev);
+  next?.addEventListener("click", moveNext);
+  prev?.addEventListener("click", movePrev);
 }
 
 // Next navigation handler
