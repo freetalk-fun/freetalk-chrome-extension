@@ -1,36 +1,45 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
+
+import { DIRECTUS_URL } from "../../environment";
+import { createDirectus, authentication, rest } from "@directus/sdk";
+
 import "./App.css";
 import Login from "../../components/Login";
-import Close from "../../Close.svg";
 import Signup from "../../components/Signup";
-import Home from "../../components/Home";
 import Forgotpassword from "../../components/Forgotpassword";
+import Close from "../../Close.svg";
+import Home from "../../components/Home";
 import Verify from "../../components/Verfify";
-import axios from "axios";
-import { createDirectus, authentication, rest } from "@directus/sdk";
-import { DIRECTUS_URL } from "../../environment";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [details, setDetails] = useState("");
   const [screen, setScreen] = useState("SIGN IN");
   const [newPassword, setNewPassword] = useState("");
-  const client = createDirectus(DIRECTUS_URL).with(authentication('session')).with(rest());
+
+  const client = createDirectus(DIRECTUS_URL)
+    .with(authentication("session"))
+    .with(rest());
+
   function close() {
     window.close();
   }
+
   function handleScreen(screen: string) {
     setScreen(screen);
   }
+
   async function handleLogout() {
     // logout using the authentication composable
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     localStorage.removeItem("token");
-    await client.logout()
+    await client.logout();
     setIsLoggedIn(false);
     setDetails("");
     setScreen("SIGN IN");
   }
+
   async function fetchUserInfo(token: string) {
     try {
       const response = await axios.get(`${DIRECTUS_URL}/users/me`, {
@@ -62,6 +71,7 @@ function App() {
       });
     }
   }, []);
+
   return (
     <div className="App">
       <div className="container">

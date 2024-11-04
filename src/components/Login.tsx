@@ -24,8 +24,8 @@ function Login({
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-    const client = createDirectus(DIRECTUS_URL)
-    .with(authentication('session'))
+  const client = createDirectus(DIRECTUS_URL)
+    .with(authentication("session"))
     .with(rest());
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -65,6 +65,7 @@ function Login({
         setError("");
         handleLogin();
         localStorage.setItem("token", result.access_token);
+        console.log(localStorage["token"]);
         handleDetails(email);
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
