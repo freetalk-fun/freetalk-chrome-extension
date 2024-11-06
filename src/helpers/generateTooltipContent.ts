@@ -2,9 +2,7 @@ import { DictionaryAPIResponse, TermData, Meaning } from "./freeTalkAPI";
 import next from "../../src/nextarrow.png"
 import prev from "../../src/prevarrow.png"
 
-export function generateTooltipContent(
-  data: any
-  ) {
+export function generateTooltipContent(data: any) {
 
     const term = data?.term;
     const meanings = data?.meanings;
@@ -12,6 +10,7 @@ export function generateTooltipContent(
 
     if (!data) return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 450;>No Data!</div>`;
     let content = "";
+
     if (message) {
       content = `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 450;">"${term}" is not in the FreeTalk Dictionary</div>`;
     }
