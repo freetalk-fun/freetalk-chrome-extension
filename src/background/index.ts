@@ -1,5 +1,4 @@
 import * as browsers from 'webextension-polyfill'
-// import { getMeaning } from '../helpers/freeTalkAPI';
 
 // export type Meaning = {
 //   definition: string;
@@ -32,11 +31,28 @@ export const getMeaning = async (searchWord: string) => {
   }
 };
 
+// export const getMeaning = async (searchWord: string) => {
+//     try{
+//         const result = await fetch(`http://65.2.38.143/flows/trigger/99c028f4-0581-4323-9921-64ecff032d19`, {
+//             method: 'POST',
+//             headers: {
+//                 "Authorization": "Bearer k2bka50PgMWkgTsg_VBpUAD2pUiTQ7Tj",
+//                 "Content-Type": "application/json",
+//                 "Connection": "keep-alive"
+//             },
+//             body: JSON.stringify(searchWord)
+//         });
+//         return await result.json();
+//     } catch (error) {
+//         console.log(error)
+//         return;
+//     }
+// };
+
 browsers.runtime.onInstalled.addListener(() => {
     // Initialize message listener
     browsers.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       if (message.type === "openPopup") {
-        // Open popup
         console.log("BG ACTION CALLED", message.payload.text);
         const result = await getMeaning(message.payload.text);
         console.log(result);

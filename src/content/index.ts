@@ -1,10 +1,7 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
-// import { generateTooltipContentOld } from "../helpers/generateTooltipContent";
-import next from "../../src/nextarrow.png"
-import prev from "../../src/prevarrow.png"
-
-import { DictionaryAPIResponse, TermData, Meaning } from "../helpers/freeTalkAPI"
+import next from "../../src/nextarrow.png";
+import prev from "../../src/prevarrow.png";
 
 const freetalkClass = document.createElement("style");
 const sliderScript = document.createElement("script");
@@ -267,7 +264,7 @@ function initCarousel() {
   moving = false;
 }
 
-export function generateTooltipContentOld(data: any) {
+export function generateTooltipContent(data: any) {
 
   // const dailyLimit = data?.dailyLimit;
   const term = data?.term;
@@ -319,42 +316,13 @@ export function generateTooltipContentOld(data: any) {
               </div>
             </div>
           </div>`;
-
-  // if (!data) return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 450;>No Data!</div>`;
-  // let content = "";
-  // if (message) {
-  //   content = `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 450;">"${term}" is not in the FreeTalk Dictionary</div>`;
-  // }
-  
-  // if (term) {
-  //   content += `
-  //     <div style="margin-bottom: 8px;">
-  //       <div style="margin-left: 4px; font-size: 24px; font-weight: 450px;">${term}</div>
-  //     </div>
-  //     `;
-  // }
-  // if (meanings) {
-  //   content += meanings
-  //     .map(
-  //       (meaning: any) => `
-  //         <div style="display: flex; flex-direction: column; margin-bottom: 4px; margin-left: 4px;">
-  //           <div style="font-weight: 450; font-size: 16px;">${meaning.pos}</div>
-  //           <div style="text-align: left; font-size: 16px; font-weight: 390;">${meaning.definition}</div>
-  //         </div>
-  //         `
-  //     )
-  //     .join("");
-  // }
-  // return `<div style="display: flex; flex-direction: column; align-items: start; text-align: left; background-color: #F9F9F9; padding: 14px; color: #1E1C22; border: 2px solid #D8D8D8; border-radius: 10px;">
-  //     ${content}
-  //   </div>`;
 }
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   
   const selection = document.getSelection();
   const selectedText = document.getSelection()?.toString().trim();
-  
+
   const targetElement = event.target;
 
   if (
@@ -377,9 +345,9 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       new RegExp(`(${selectedText})`, "gi"),
       '<span id="tooltip" style="width:auto;">$1</span>'
     );
-
     //@ts-ignore
     targetElement.innerHTML = highlightedHTML;
+
     const data = await browser.runtime.sendMessage({
       type: "openPopup",
       payload: {
@@ -388,7 +356,7 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     });
 
     const instance = tippy("#tooltip", {
-      content: generateTooltipContentOld(data),
+      content: generateTooltipContent(data),
       hideOnClick: true,
       interactive: true,
       allowHTML: true,
