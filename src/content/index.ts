@@ -8,7 +8,7 @@ const sliderScript = document.createElement("script");
 
 const rules = `
     .tippy-box[data-theme="freetalk"] {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif;
       background-color: #F9F9F9;
       color: #2E2E2E;
       border: 2px solid #d9d9d9;
@@ -293,11 +293,11 @@ export function generateTooltipContent(data: any) {
     meanings.forEach((meaning: any, index: number)=>{
       meaningsHTML += `
           <div class="carousel__photo ${index === 0 ? "": ""}" >
-            <div  style="display:flex; justify-content: space-between; font-family: 'Product-Brand-Grotesque-Regular'; font-weight:700;">
+            <div  style="display:flex; justify-content: space-between; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">
               ${termHeader}
-              <p class="elementToFadeInAndOut fade-in" style="font-size: 16px; color: black; margin: 0; font-family: 'Product-Brand-Grotesque-Regular'; font-weight:700;">${meaning.pos}</p>
+              <p class="elementToFadeInAndOut fade-in" style="font-size: 16px; color: black; margin: 0; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">${meaning.pos}</p>
             </div>
-            <p class="content elementToFadeInAndOut fade-in" style=" font-family: 'Product-Brand-Grotesque-Light';text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
+            <p class="content elementToFadeInAndOut fade-in" style=" font-family:Product-Brand-Grotesque-Light;text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
           </div>`;
     })
   }
@@ -320,38 +320,51 @@ export function generateTooltipContent(data: any) {
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   
-  const selection = document.getSelection();
-  const selectedText = document.getSelection()?.toString().trim();
-
+  const selection = window.getSelection();
+  const selectedText = selection?.toString().trim();
   const targetElement = event.target;
+
 
   if (
     selection?.type === "Range" &&
+    selection.rangeCount > 0 &&
     targetElement &&
     selectedText &&
     selectedText !== ""
   ) {
+
+    // Apply the popup CSS to the document.
+    // This if/else block is a cross-browser compatibility check.
     if (freetalkClass.textContent) {
       freetalkClass.textContent = rules;
     } else {
       freetalkClass.appendChild(document.createTextNode(rules));
     }
-
     document.body.appendChild(freetalkClass);
 
-    //@ts-ignore
-    const innerHTML = targetElement.innerHTML;
-    const highlightedHTML = innerHTML.replace(
-      new RegExp(`(${selectedText})`, "gi"),
-      '<span id="tooltip" style="width:auto;">$1</span>'
-    );
-    //@ts-ignore
-    targetElement.innerHTML = highlightedHTML;
+    // sets a range, to be used in if block below
+    const range = selection.getRangeAt(0);
 
+    // create the span element
+    if ((targetElement as Element).contains(range.commonAncestorContainer)) {
+      const rangeToString = range.toString();
+
+      // instantiate span element
+      const span = document.createElement("span");
+      span.id = "tooltip";
+      span.style.width = "auto";
+      span.textContent = selectedText;
+
+      // Replace text with span
+      range.deleteContents();
+      range.insertNode(span);
+    }
+
+    // GET DATA AND TRIGGER TOOLTIP
     const data = await browser.runtime.sendMessage({
       type: "openPopup",
       payload: {
-        text: selectedText,
+        text: selectedText.toLowerCase(),
       },
     });
 
@@ -365,14 +378,19 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       onHidden(instance) {
         instance.destroy();
         let tooltipEl = document.getElementById("tooltip");
+        console.log("tooltipEl:", tooltipEl)
         let parentEl = tooltipEl?.parentElement;
+        console.log("parentEl:", parentEl)
         let spanText = tooltipEl?.textContent;
+        console.log("spanText:", spanText)
         parentEl?.replaceChild(
           document.createTextNode(spanText ?? ""),
           tooltipEl!
         );
+        console.log("parentEl:", parentEl)
       },
     });
+
     instance[0].show();
   }
 
