@@ -7,31 +7,31 @@ const freetalkClass = document.createElement("style");
 const sliderScript = document.createElement("script");
 
 const rules = `
-    .tippy-box[data-theme="freetalk"] {
-      font-family: Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif;
-      background-color: #F9F9F9;
-      color: #2E2E2E;
-      border: 2px solid #d9d9d9;
-      padding: 22px 50px 22px 50px;
-      border-radius: 6px;
-      min-width: 400px;
-      max-width: 100%;
-      white-space: normal;
-      text-align: left;
-    }
+  .tippy-box[data-theme="freetalk"] {
+    font-family: Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif;
+    background-color: #F9F9F9;
+    color: #2E2E2E;
+    border: 2px solid #d9d9d9;
+    padding: 22px 50px 22px 50px;
+    border-radius: 6px;
+    min-width: 400px;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
 
-    /* Resetting default browser styles */
-    .tippy-toolbox div, .tippy-toolbox span, .tippy-toolbox h1, .tippy-toolbox h2, .tippy-toolbox h3, .tippy-toolbox h4, .tippy-toolbox h5, .tippy-toolbox h6, .tippy-toolbox p, .tippy-toolbox blockquote, .tippy-toolbox pre,
-    .tippy-toolbox a, .tippy-toolbox img, .tippy-toolbox strong, .tippy-toolbox sub, .tippy-toolbox sup, .tippy-toolbox b, .tippy-toolbox u, .tippy-toolbox i, .tippy-toolbox ol, .tippy-toolbox ul, .tippy-toolbox li,
-    .tippy-toolbox form, .tippy-toolbox label,
-    .tippy-toolbox tbody, .tippy-toolbox tfoot, .tippy-toolbox thead, .tippy-toolbox tr, .tippy-toolbox th, .tippy-toolbox td {
-      margin: 0;
-      padding: 0;
-      border: 0;
-      font-size: 100%;
-      font: inherit;
-      vertical-align: baseline;
-      line-height:1;
+  /* Resetting default browser styles */
+  .tippy-toolbox div, .tippy-toolbox span, .tippy-toolbox h1, .tippy-toolbox h2, .tippy-toolbox h3, .tippy-toolbox h4, .tippy-toolbox h5, .tippy-toolbox h6, .tippy-toolbox p, .tippy-toolbox blockquote, .tippy-toolbox pre,
+  .tippy-toolbox a, .tippy-toolbox img, .tippy-toolbox strong, .tippy-toolbox sub, .tippy-toolbox sup, .tippy-toolbox b, .tippy-toolbox u, .tippy-toolbox i, .tippy-toolbox ol, .tippy-toolbox ul, .tippy-toolbox li,
+  .tippy-toolbox form, .tippy-toolbox label,
+  .tippy-toolbox tbody, .tippy-toolbox tfoot, .tippy-toolbox thead, .tippy-toolbox tr, .tippy-toolbox th, .tippy-toolbox td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    line-height:1;
   }
 
   .tippy-toolbox ol, .tippy-toolbox ul {
@@ -73,7 +73,7 @@ const rules = `
     width: 100%;
     margin: auto;
     padding: 0 30px;
-    z-index: 100;
+    z-index: 7000;
     // transition: transform .5s, opacity 1s, z-index .5s;
   }
 
@@ -81,12 +81,12 @@ const rules = `
   .carousel__photo.active {
     opacity: 1;
     position: relative;
-    z-index: 900;
+    z-index: 9000;
   }
 
   .carousel__photo.prev,
   .carousel__photo.next {
-    z-index: 800;
+    z-index: 8000;
   }
 
   // .carousel__photo.prev {
@@ -100,7 +100,7 @@ const rules = `
   .carousel__button--next {
     width: 12px;
     cursor: pointer; 
-    z-index: 1001;
+    z-index: 10000;
     padding-top:3px
   }
   .dot {
@@ -113,24 +113,25 @@ const rules = `
   .dot.active{
     background-color: #000;
   }
-.elementToFadeInAndOut {
-  opacity: 0;
-}
 
-.fade-in {
-  -webkit-animation: fadeIn 1s forwards;
-  animation: fadeIn 1s forwards;
-}
+  .elementToFadeInAndOut {
+    opacity: 0;
+  }
 
-@-webkit-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
+  .fade-in {
+    -webkit-animation: fadeIn 1s forwards;
+    animation: fadeIn 1s forwards;
+  }
 
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
+  @-webkit-keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
 
 `;
 
@@ -324,7 +325,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   const selectedText = selection?.toString().trim();
   const targetElement = event.target;
 
-
   if (
     selection?.type === "Range" &&
     selection.rangeCount > 0 &&
@@ -360,8 +360,8 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       range.insertNode(span);
     }
 
-    // GET DATA AND TRIGGER TOOLTIP
-    const data = await browser.runtime.sendMessage({
+     // GET DATA AND TRIGGER TOOLTIP
+     const data = await browser.runtime.sendMessage({
       type: "openPopup",
       payload: {
         text: selectedText.toLowerCase(),
