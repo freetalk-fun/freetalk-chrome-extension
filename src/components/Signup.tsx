@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import "../popup/index.css";
 import eye from "../eye.svg";
 import eyeClose from "../eye-close.svg";
-import { createDirectus, rest, registerUser} from "@directus/sdk";
+import { createDirectus, rest, registerUser } from "@directus/sdk";
 import { DIRECTUS_URL } from "../environment";
 
-type SignupPros = {
+type SignupProps = {
   handleSignup: () => void;
   handleDetails: (data: string) => void;
   handleScreen: (screen: string) => void;
 };
 
-function Signup({ handleSignup, handleDetails,handleScreen }: SignupPros) {
+function Signup({ handleSignup, handleDetails, handleScreen }: SignupProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -20,7 +20,6 @@ function Signup({ handleSignup, handleDetails,handleScreen }: SignupPros) {
   const [showPassword, setShowPassword] = useState(false);
   const [showRepassword, setReshowPassword] = useState(false);
   const client = createDirectus(DIRECTUS_URL).with(rest());
-
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -104,32 +103,32 @@ function Signup({ handleSignup, handleDetails,handleScreen }: SignupPros) {
             Password
           </label>
           <div className="relative">
-          <input
-            className="px-[16px] w-full py-[14px] rounded-lg border border-[#E4E2E7] focus:outline-none focus:border-[#4E00E8]"
-            id="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-          <button
-            className="absolute right-[10px] top-0 bottom-0 "
-            onClick={togglePasswordVisibility}
-          >
-            {showPassword ? (
-              <img
-                src={eye}
-                className="w-5  text-gray-400 cursor-pointer"
-                alt=""
-              />
-            ) : (
-              <img
-                src={eyeClose}
-                className="w-5  text-gray-400 cursor-pointer"
-                alt=""
-              />
-            )}
-          </button>
+            <input
+              className="px-[16px] w-full py-[14px] rounded-lg border border-[#E4E2E7] focus:outline-none focus:border-[#4E00E8]"
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter password"
+              value={password}
+              onChange={handlePasswordChange}
+            />
+            <button
+              className="absolute right-[10px] top-0 bottom-0"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <img
+                  src={eye}
+                  className="w-5  text-gray-400 cursor-pointer"
+                  alt=""
+                />
+              ) : (
+                <img
+                  src={eyeClose}
+                  className="w-5  text-gray-400 cursor-pointer"
+                  alt=""
+                />
+              )}
+            </button>
           </div>
         </div>
         <div className="flex flex-col pt-4 gap-3 relative">
@@ -140,32 +139,32 @@ function Signup({ handleSignup, handleDetails,handleScreen }: SignupPros) {
             Repeat Password
           </label>
           <div className="relative">
-          <input
-            className="px-[16px] w-full py-[14px] rounded-lg border border-[#E4E2E7] focus:outline-none focus:border-[#4E00E8]"
-            id="repeatPassword"
-            type={showRepassword ? "text" : "password"}
-            placeholder="Enter repeat password"
-            value={repeatPassword}
-            onChange={handleRepeatPasswordChange}
-          />
-          <button
-            className="absolute  right-[10px] top-0 bottom-0"
-            onClick={toggleRePasswordVisibility}
-          >
-            {showRepassword ? (
-              <img
-                src={eye}
-                className="w-5  text-gray-400 cursor-pointer"
-                alt=""
-              />
-            ) : (
-              <img
-                src={eyeClose}
-                className="w-5  text-gray-400 cursor-pointer"
-                alt=""
-              />
-            )}
-          </button>
+            <input
+              className="px-[16px] w-full py-[14px] rounded-lg border border-[#E4E2E7] focus:outline-none focus:border-[#4E00E8]"
+              id="repeatPassword"
+              type={showRepassword ? "text" : "password"}
+              placeholder="Enter repeat password"
+              value={repeatPassword}
+              onChange={handleRepeatPasswordChange}
+            />
+            <button
+              className="absolute  right-[10px] top-0 bottom-0"
+              onClick={toggleRePasswordVisibility}
+            >
+              {showRepassword ? (
+                <img
+                  src={eye}
+                  className="w-5 text-gray-400 cursor-pointer"
+                  alt=""
+                />
+              ) : (
+                <img
+                  src={eyeClose}
+                  className="w-5 text-gray-400 cursor-pointer"
+                  alt=""
+                />
+              )}
+            </button>
           </div>
           {passwordError && (
             <span className="text-red-500 text-sm mt-1 text-start">
@@ -175,7 +174,7 @@ function Signup({ handleSignup, handleDetails,handleScreen }: SignupPros) {
         </div>
       </div>
       <div className="flex gap-3 items-center w-full pt-6 pb-3">
-      <button
+        <button
           className="px-3 py-2 border border-[#E4E2E7] text-[15px] rounded-lg w-full bg-[#F4F4F7] text-[#4E00E8] font-Brand-reg font-bold"
           onClick={() => handleScreen("SIGN IN")}
         >

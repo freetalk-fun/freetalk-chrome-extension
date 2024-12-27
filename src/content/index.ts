@@ -268,9 +268,15 @@ function initCarousel() {
 export function generateTooltipContent(data: any) {
 
   // const dailyLimit = data?.dailyLimit;
-  const term = data?.term;
-  const meanings = data?.meanings;
-  const message = data?.message;
+  // const term = data?.term;
+  // const meanings = data?.meanings;
+  // const message = data?.message;
+
+  const dailyLimit = data?.dailyLimit;
+  console.log("DAILY LIMIT:", dailyLimit)
+  const term = data?.term_data.term;
+  const meanings = data?.term_data.meanings;
+  const message = data?.term_data.message;
 
   console.log("term within genContent:", term);
   console.log("meanings within genContent:", meanings);

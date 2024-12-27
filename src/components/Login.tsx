@@ -5,8 +5,9 @@ import eyeClose from "../eye-close.svg";
 import { createDirectus, rest, authentication, login } from "@directus/sdk";
 import { DIRECTUS_URL } from "../environment";
 
-type LoginPros = {
+type LoginProps = {
   handleLogin: () => void;
+  setToken: (result: any) => void;
   handleScreen: (screen: string) => void;
   details: string;
   handleDetails: (data: string) => void;
@@ -15,10 +16,11 @@ type LoginPros = {
 
 function Login({
   handleLogin,
+  setToken,
   handleScreen,
   handleDetails,
   newPassword,
-}: LoginPros) {
+}: LoginProps) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -45,6 +47,7 @@ function Login({
     setShowPassword(!showPassword);
   };
   const validateAndLogin = async () => {
+    console.log("triggered ValidateAndLogin func");
     let isValid = true;
 
     // Validate email
@@ -62,19 +65,18 @@ function Login({
     if (isValid) {
       try {
         const result: any = await client.request(login(email, password));
+        await setToken(result.access_token);
+
         setError("");
         handleLogin();
-        localStorage.setItem("token", result.access_token);
-        console.log(localStorage["token"]);
         handleDetails(email);
+        handleScreen("LOGGED IN");
       } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          setError(
-            "Invalid credentials or email not verified. Please check your details and try again, or verify your email."
-          );
-        } else {
-          setError(`An error occurred: ${error.message}`);
-        }
+        setError(
+          error.response?.status === 401
+            ? "Invalid credentials or email not verified. Please check your details and try again."
+            : `An error occurred: ${error.message}`
+        );
       }
     }
   };

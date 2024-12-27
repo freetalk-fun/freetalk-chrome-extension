@@ -3,7 +3,7 @@ import "../popup/index.css";
 import eye from "../eye.svg";
 import eyeClose from "../eye-close.svg";
 
-type ForgotPasswordProps = {
+type ForgotpasswordProps = {
   handleScreen: (screen: string) => void;
   setNewRPassword: (password: string) => void;
 };
@@ -11,7 +11,7 @@ type ForgotPasswordProps = {
 function Forgotpassword({
   handleScreen,
   setNewRPassword,
-}: ForgotPasswordProps) {
+}: ForgotpasswordProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newPasserror, setNewpasserror] = useState("");
