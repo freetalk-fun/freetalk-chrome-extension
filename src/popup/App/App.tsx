@@ -1,14 +1,11 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-
 import { DIRECTUS_URL } from "../../environment";
-import { createDirectus, authentication, rest, logout } from "@directus/sdk";
+import { useEffect, useState } from "react";
 
 import "./App.css";
 import Login from "../../components/Login";
 import Signup from "../../components/Signup";
 import Forgotpassword from "../../components/Forgotpassword";
-import Close from "../../Close.svg";
 import Home from "../../components/Home";
 import Verify from "../../components/Verify";
 
@@ -16,19 +13,20 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [details, setDetails] = useState("");
   const [screen, setScreen] = useState("SIGN IN"); // SIGN IN || SIGN UP || FORGOT PASSWORD || VERIFY
-  const [newPassword, setNewPassword] = useState("");
-
-  const client = createDirectus(DIRECTUS_URL)
-    .with(authentication("session"))
-    .with(rest());
+  // const [newPassword, setNewPassword] = useState("");
 
   function handleScreen(screen: string) {
     setScreen(screen);
   }
 
   async function handleLogin() {
+    try {
+      await getToken();
+    } catch (error) {
+      console.error("Error on login:", error);
+      return;
+    }
     setIsLoggedIn(true);
-    await getToken();
   }
 
   async function handleLogout() {
@@ -37,13 +35,13 @@ function App() {
 
     try {
       const token = getToken();
-      const response = await axios.post(`${DIRECTUS_URL}/auth/logout`, {
+      await axios.post(`${DIRECTUS_URL}/auth/logout`, {
         body: {
           refresh_token: token,
           mode: "json",
         },
       });
-      removeToken();
+      removeToken("token");
       setIsLoggedIn(false);
       setDetails("");
       handleScreen("SIGN IN");
@@ -56,32 +54,41 @@ function App() {
 
   function getToken(): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(["token"], (result) => {
+      chrome.storage.local.get("token", (result) => {
         if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
         }
-        console.log("Get TOKEN:", result.token);
-        resolve(result.token); // Explicitly resolve with the correct type
+        if (!result.token) {
+          console.warn("Token not found in storage.");
+          resolve(undefined); // Explicitly resolve undefined if no token is found
+        } else {
+          console.log("Get TOKEN:", result.token);
+          resolve(result.token); // Resolve the token value
+        }
       });
     });
   }
 
-  function setToken(token: string): Promise<void> {
+  function setToken(token: any): Promise<void> {
+    console.log("RESULT:", token);
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({ token }, () => {
         if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
         }
-        console.log("SET TOKEN!");
+        console.log("SET TOKEN!", token);
         resolve(); // Explicitly resolve with void
       });
     });
   }
 
-  function removeToken(): Promise<void> {
+  function removeToken(value: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.remove("token", () => {
+      chrome.storage.local.remove(value, () => {
         if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
         }
         console.log("REMOVED TOKEN!");
@@ -90,46 +97,34 @@ function App() {
     });
   }
 
-  async function fetchUserInfo(token: string) {
-    try {
-      const response = await axios.get(`${DIRECTUS_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-      return null;
-    }
-  }
+  // refresh token
 
   useEffect(() => {
     const initialize = async () => {
       try {
         // Get the token from storage
         const token = await getToken();
-        if (!token) {
-          console.log("getToken failed on init");
-          return;
-        }
-        console.log("getToken success on init", token);
+        if (token) {
+          console.log("getToken success on init", token);
+          // setScreen("LOGGED IN");
 
-        // Fetch user details
-        try {
-          const response: any = await axios.get(`${DIRECTUS_URL}/users/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (response) {
-            setIsLoggedIn(true);
-            setDetails(response.data.data.email);
-            console.log(setDetails);
-            setScreen("LOGGED IN");
+          // Fetch User Details
+          try {
+            const response: any = await axios.get(`${DIRECTUS_URL}/users/me`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (response) {
+              setIsLoggedIn(true);
+              setDetails(response.data.data.email);
+              console.log(setDetails);
+              setScreen("LOGGED IN");
+            }
+          } catch (error) {
+            console.error("Error fetching user details:", error);
+            await removeToken("token");
           }
-        } catch (error) {
-          console.error("Error fetching user details:", error);
-          await removeToken();
         }
+        console.log("getToken failed on init");
       } catch (error) {
         console.error("Initialization error:", error);
       }
@@ -150,7 +145,6 @@ function App() {
             handleScreen={handleScreen}
             details={details}
             handleDetails={setDetails}
-            newPassword={newPassword}
           />
         )}
         {!isLoggedIn && screen === "SIGN UP" && (
@@ -161,13 +155,10 @@ function App() {
           />
         )}
         {!isLoggedIn && screen === "FORGOT PASSWORD" && (
-          <Forgotpassword
-            handleScreen={handleScreen}
-            setNewRPassword={setNewPassword}
-          />
+          <Forgotpassword handleScreen={handleScreen} />
         )}
         {!isLoggedIn && screen === "VERIFY" && <Verify email={details} />}
-        {isLoggedIn ? (
+        {isLoggedIn && screen === "LOGGED IN" ? (
           <Home
             handleLogout={handleLogout}
             handleScreen={handleScreen}

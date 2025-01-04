@@ -30,7 +30,6 @@ function Home({ email, handleLogout }: HomeProps) {
         <button
           className="px-3 py-2 border border-[#E4E2E7] text-[15px] rounded-lg  bg-[#4E00E8] text-white font-Brand-reg"
           onClick={() => handleLogout()}
-          // onClick={() => console.log("clicked logout!")}
         >
           Sign Out
         </button>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../popup/index.css";
-import eye from "../eye.svg";
-import eyeClose from "../eye-close.svg";
+import eye from "../assets/eye.svg";
+import eyeClose from "../assets/eye-close.svg";
 import { createDirectus, rest, registerUser } from "@directus/sdk";
 import { DIRECTUS_URL } from "../environment";
 

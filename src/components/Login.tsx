@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import "../popup/index.css";
-import eye from "../eye.svg";
-import eyeClose from "../eye-close.svg";
-import { createDirectus, rest, authentication, login } from "@directus/sdk";
+import eye from "../assets/eye.svg";
+import eyeClose from "../assets/eye-close.svg";
 import { DIRECTUS_URL } from "../environment";
 
 type LoginProps = {
   handleLogin: () => void;
-  setToken: (result: any) => void;
+  setToken: (token: any) => void;
   handleScreen: (screen: string) => void;
   details: string;
   handleDetails: (data: string) => void;
-  newPassword?: string;
 };
 
 function Login({
@@ -19,16 +17,13 @@ function Login({
   setToken,
   handleScreen,
   handleDetails,
-  newPassword,
 }: LoginProps) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const client = createDirectus(DIRECTUS_URL)
-    .with(authentication("session"))
-    .with(rest());
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
     setEmailError("");
@@ -43,9 +38,11 @@ function Login({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
   const validateAndLogin = async () => {
     console.log("triggered ValidateAndLogin func");
     let isValid = true;
@@ -64,13 +61,34 @@ function Login({
 
     if (isValid) {
       try {
-        const result: any = await client.request(login(email, password));
-        await setToken(result.access_token);
+        const response: any = await fetch(`${DIRECTUS_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        });
 
-        setError("");
-        handleLogin();
-        handleDetails(email);
-        handleScreen("LOGGED IN");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Login successful:", result);
+
+        const token = result.data?.access_token;
+        console.log("access token check:", token.data?.access_token);
+
+        if (token) {
+          await setToken(token);
+          setError("");
+          handleLogin();
+          handleDetails(email);
+          handleScreen("LOGGED IN");
+        }
       } catch (error: any) {
         setError(
           error.response?.status === 401
@@ -108,20 +126,6 @@ function Login({
             </span>
           )}
         </div>
-        {/* <div className="flex flex-col pt-4 gap-3">
-        <label className="text-start mb-1 text-[14px] font-Brand-reg font-medium text-[#1C1921]" htmlFor="password">
-          Password
-        </label>
-        <input
-          className="px-[16px] py-[14px] rounded-lg border border-[#E4E2E7] focus:outline-none focus:border-[#4E00E8]"
-          id="password"
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={handlePasswordChange}
-        />
-        {error && <span className="text-red-500 text-sm mt-1 text-start">{error}</span>}
-      </div> */}
         <div className="flex flex-col pt-4 gap-3 relative">
           <label
             className="text-start mb-1 text-[14px] font-Brand-reg font-medium text-[#1C1921]"

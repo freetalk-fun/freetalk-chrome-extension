@@ -1,7 +1,7 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
-import next from "../../src/nextarrow.png";
-import prev from "../../src/prevarrow.png";
+import next from "../../src/assets/nextarrow.png";
+import prev from "../../src/assets/prevarrow.png";
 
 const freetalkClass = document.createElement("style");
 const sliderScript = document.createElement("script");

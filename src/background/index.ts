@@ -1,24 +1,7 @@
 import * as browsers from 'webextension-polyfill';
 import { DIRECTUS_URL } from "../environment";
-import { createDirectus, authentication, rest, logout } from "@directus/sdk";
 
-// export type Meaning = {
-//   definition: string;
-//   pos: string;
-// };
-
-// export type TermData = {
-//   term: string;
-//   meanings: Meaning[];
-// };
-
-// export type DictionaryAPIResponse = {
-//   daily_limit: number;
-//   term_data?: TermData;
-//   message?: string
-// };
-
-function getToken(): Promise<string | undefined> {
+function getToken(value: string): Promise<string | undefined> {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(["token"], (result) => {
       if (chrome.runtime.lastError) {
@@ -32,7 +15,7 @@ function getToken(): Promise<string | undefined> {
 
 export const getMeaning = async (searchWord: string) => {
   try {
-    const token = await getToken();
+    const token = await getToken("token");
     const response = await fetch(`${DIRECTUS_URL}/flows/trigger/99c028f4-0581-4323-9921-64ecff032d19`, {
       method: 'POST',
       headers: {
