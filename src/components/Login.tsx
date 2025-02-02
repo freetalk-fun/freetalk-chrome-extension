@@ -6,7 +6,7 @@ import { DIRECTUS_URL } from "../environment";
 
 type LoginProps = {
   handleLogin: () => void;
-  setToken: (token: any) => void;
+  setData: (token: any) => void;
   handleScreen: (screen: string) => void;
   details: string;
   handleDetails: (data: string) => void;
@@ -14,7 +14,7 @@ type LoginProps = {
 
 function Login({
   handleLogin,
-  setToken,
+  setData,
   handleScreen,
   handleDetails,
 }: LoginProps) {
@@ -83,7 +83,7 @@ function Login({
         console.log("access token check:", token.data?.access_token);
 
         if (token) {
-          await setToken(token);
+          await setData(token);
           setError("");
           handleLogin();
           handleDetails(email);

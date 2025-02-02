@@ -21,7 +21,7 @@ function App() {
 
   async function handleLogin() {
     try {
-      await getToken();
+      await getData("token");
     } catch (error) {
       console.error("Error on login:", error);
       return;
@@ -34,14 +34,14 @@ function App() {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 
     try {
-      const token = getToken();
+      const token = getData("token");
       await axios.post(`${DIRECTUS_URL}/auth/logout`, {
         body: {
           refresh_token: token,
           mode: "json",
         },
       });
-      removeToken("token");
+      removeData("token");
       setIsLoggedIn(false);
       setDetails("");
       handleScreen("SIGN IN");
@@ -52,9 +52,9 @@ function App() {
     console.log("clicked logout:", screen, details, isLoggedIn);
   }
 
-  function getToken(): Promise<string | undefined> {
+  function getData(value: string): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get("token", (result) => {
+      chrome.storage.local.get(value, (result) => {
         if (chrome.runtime.lastError) {
           console.error(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
@@ -70,7 +70,7 @@ function App() {
     });
   }
 
-  function setToken(token: any): Promise<void> {
+  function setData(token: any): Promise<void> {
     console.log("RESULT:", token);
     return new Promise((resolve, reject) => {
       chrome.storage.local.set({ token }, () => {
@@ -84,7 +84,7 @@ function App() {
     });
   }
 
-  function removeToken(value: string): Promise<void> {
+  function removeData(value: string): Promise<void> {
     return new Promise((resolve, reject) => {
       chrome.storage.local.remove(value, () => {
         if (chrome.runtime.lastError) {
@@ -98,14 +98,13 @@ function App() {
   }
 
   // refresh token
-
   useEffect(() => {
     const initialize = async () => {
       try {
         // Get the token from storage
-        const token = await getToken();
+        const token = await getData("token");
         if (token) {
-          console.log("getToken success on init", token);
+          console.log("getData success on init", token);
           // setScreen("LOGGED IN");
 
           // Fetch User Details
@@ -121,10 +120,10 @@ function App() {
             }
           } catch (error) {
             console.error("Error fetching user details:", error);
-            await removeToken("token");
+            await removeData("token");
           }
         }
-        console.log("getToken failed on init");
+        console.log("getData failed on init");
       } catch (error) {
         console.error("Initialization error:", error);
       }
@@ -141,7 +140,7 @@ function App() {
         {!isLoggedIn && screen === "SIGN IN" && (
           <Login
             handleLogin={handleLogin}
-            setToken={setToken}
+            setData={setData}
             handleScreen={handleScreen}
             details={details}
             handleDetails={setDetails}
