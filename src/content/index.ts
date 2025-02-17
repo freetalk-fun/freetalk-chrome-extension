@@ -145,19 +145,30 @@ let dots = document.getElementsByClassName(dotsClassName);
 
 // Set classes
 function setInitialClasses() {
-  // Targets the previous, current, and next items
-  // This assumes there are at least three items.
-  items[totalItems - 1].classList.add("prev");
-  items[0].classList.add("active");
-  items[1].classList.add("next");
+  if (totalItems >= 3) {
+    if (items[totalItems - 1]) items[totalItems - 1].classList.add("prev");
+    if (items[0]) items[0].classList.add("active");
+    if (items[1]) items[1].classList.add("next");
+  } else if (totalItems === 2) {
+    if (items[0]) items[0].classList.add("active");
+    if (items[1]) items[1].classList.add("next");
+  } else if (totalItems === 1) {
+    if (items[0]) items[0].classList.add("active");
+  }
 }
 
 // Set event listeners
 function setEventListeners() {
-  let next = document.getElementsByClassName("carousel__button--next")[0],
-    prev = document.getElementsByClassName("carousel__button--prev")[0];
-  next.addEventListener("click", moveNext);
-  prev.addEventListener("click", movePrev);
+  const next = document.getElementsByClassName("carousel__button--next")[0];
+  const prev = document.getElementsByClassName("carousel__button--prev")[0];
+  
+  if (next) {
+    next.addEventListener("click", moveNext);
+  }
+  
+  if (prev) {
+    prev.addEventListener("click", movePrev);
+  }
 }
 
 // Next navigation handler
@@ -244,12 +255,12 @@ function moveCarouselTo(slide: number) {
       // Now we've worked out where we are and where we're going,
       // by adding/removing classes we'll trigger the transitions.
       // Reset old next/prev elements to default classes
-      items[oldPrevious].className = itemClassName;
-      items[oldNext].className = itemClassName;
+      if (items[oldPrevious]) items[oldPrevious].className = itemClassName;
+      if (items[oldNext]) items[oldNext].className = itemClassName;
       // Add new classes
-      items[newPrevious].className = itemClassName + " prev";
-      items[slide].className = itemClassName + " active";
-      items[newNext].className = itemClassName + " next";
+      if (items[newPrevious]) items[newPrevious].className = itemClassName + " prev";
+      if (items[slide]) items[slide].className = itemClassName + " active";
+      if (items[newNext]) items[newNext].className = itemClassName + " next";
     }
   }
 }
@@ -325,8 +336,9 @@ export function generateTooltipContent(data: any) {
           </div>`;
 }
 
+// ...existing code...
+
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
-  
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
   const targetElement = event.target;
@@ -338,69 +350,82 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     selectedText &&
     selectedText !== ""
   ) {
+    // Create a container for the shadow DOM
+    const shadowContainer = document.createElement("div");
+    shadowContainer.style.position =  "absolute";
+    shadowContainer.style.top = "0";
+    shadowContainer.style.left = "0";
+    shadowContainer.style.width = "100%";
+    shadowContainer.style.height = "100%";
+    shadowContainer.style.zIndex = "10000";
+    document.body.appendChild(shadowContainer);
 
-    // Apply the popup CSS to the document.
-    // This if/else block is a cross-browser compatibility check.
-    if (freetalkClass.textContent) {
-      freetalkClass.textContent = rules;
-    } else {
-      freetalkClass.appendChild(document.createTextNode(rules));
+    // Function to update the tooltip's position
+    const updateTooltipPosition = () => {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      // Get mouse coordinates
+      const mouseY = event.clientY;
+      const mouseX = event.clientX;
+      console.log('Mouse Y:', mouseY);
+      console.log('Mouse X:', mouseX);
+      shadowContainer.style.top = `${mouseY + window.scrollY - 25}px`;
+      shadowContainer.style.left = `${mouseX}px`;
+      console.log('tooltipElement.style.top:', shadowContainer.style.top);
+      console.log('tooltipElement.style.left:', shadowContainer.style.left);
+    };
+
+    // Create the shadow root
+    const shadowRoot = shadowContainer.attachShadow({ mode: "open" });
+
+    // Apply the popup CSS to the shadow DOM
+    const styleElement = document.createElement("style");
+    styleElement.textContent = rules;
+    shadowRoot.appendChild(styleElement);
+
+    // Create the tooltip element
+    const tooltipElement = document.createElement("div");
+    tooltipElement.id = "tooltip";
+    tooltipElement.style.pointerEvents = "auto";
+    tooltipElement.style.position = "absolute"; // Ensure absolute positioning
+    shadowRoot.appendChild(tooltipElement);
+
+    try {
+      // GET DATA AND TRIGGER TOOLTIP
+      const data = await browser.runtime.sendMessage({
+        type: "openPopup",
+        payload: {
+          text: selectedText.toLowerCase(),
+        },
+      });
+
+      const instance = tippy(tooltipElement, {
+        content: generateTooltipContent(data),
+        hideOnClick: true,
+        interactive: true,
+        allowHTML: true,
+        theme: "freetalk",
+        trigger: "manual",
+        onHidden(instance) {
+          instance.destroy();
+          shadowContainer.remove();
+          window.removeEventListener("scroll", updateTooltipPosition);
+        },
+      });
+
+      // Position the tooltip below the selected text
+      updateTooltipPosition();
+      instance.show();
+
+      // Add scroll event listener to update the tooltip's position on scroll
+      // window.addEventListener("scroll", updateTooltipPosition);
+    } catch (error) {
+      console.error("Error sending message to background script:", error);
+      shadowContainer.remove();
     }
-    document.body.appendChild(freetalkClass);
-
-    // sets a range, to be used in if block below
-    const range = selection.getRangeAt(0);
-
-    // create the span element
-    if ((targetElement as Element).contains(range.commonAncestorContainer)) {
-      const rangeToString = range.toString();
-
-      // instantiate span element
-      const span = document.createElement("span");
-      span.id = "tooltip";
-      span.style.width = "auto";
-      span.textContent = selectedText;
-
-      // Replace text with span
-      range.deleteContents();
-      range.insertNode(span);
-    }
-
-     // GET DATA AND TRIGGER TOOLTIP
-     const data = await browser.runtime.sendMessage({
-      type: "openPopup",
-      payload: {
-        text: selectedText.toLowerCase(),
-      },
-    });
-
-    const instance = tippy("#tooltip", {
-      content: generateTooltipContent(data),
-      hideOnClick: true,
-      interactive: true,
-      allowHTML: true,
-      theme: "freetalk",
-      trigger: "manual",
-      onHidden(instance) {
-        instance.destroy();
-        let tooltipEl = document.getElementById("tooltip");
-        console.log("tooltipEl:", tooltipEl)
-        let parentEl = tooltipEl?.parentElement;
-        console.log("parentEl:", parentEl)
-        let spanText = tooltipEl?.textContent;
-        console.log("spanText:", spanText)
-        parentEl?.replaceChild(
-          document.createTextNode(spanText ?? ""),
-          tooltipEl!
-        );
-        console.log("parentEl:", parentEl)
-      },
-    });
-
-    instance[0].show();
   }
 
-  initCarousel()
+  initCarousel();
 });
 
 export {};
