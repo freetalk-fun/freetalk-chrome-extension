@@ -277,14 +277,6 @@ function initCarousel() {
 }
 
 export function generateTooltipContent(data: any) {
-
-  // const dailyLimit = data?.dailyLimit;
-  // const term = data?.term;
-  // const meanings = data?.meanings;
-  // const message = data?.message;
-
-  // const dailyLimit = data?.dailyLimit;
-  // console.log("DAILY LIMIT:", dailyLimit)
   const term = data?.term;
   const meanings = data?.meanings;
   const message = data?.message;
@@ -308,16 +300,16 @@ export function generateTooltipContent(data: any) {
   }
   
   if (meanings) {
-    meanings.forEach((meaning: any, index: number)=>{
+    meanings.forEach((meaning: any, index: number) => {
       meaningsHTML += `
-          <div class="carousel__photo ${index === 0 ? "": ""}" >
-            <div  style="display:flex; justify-content: space-between; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">
+          <div class="carousel__photo ${index === 0 ? "active" : ""}" >
+            <div style="display:flex; justify-content: space-between; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">
               ${termHeader}
               <p class="elementToFadeInAndOut fade-in" style="font-size: 16px; color: black; margin: 0; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">${meaning.pos}</p>
             </div>
-            <p class="content elementToFadeInAndOut fade-in" style=" font-family:Product-Brand-Grotesque-Light;text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
+            <p class="content elementToFadeInAndOut fade-in" style="font-family:Product-Brand-Grotesque-Light;text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
           </div>`;
-    })
+    });
   }
   
   return `<div class="carousel-wrapper">
@@ -327,10 +319,10 @@ export function generateTooltipContent(data: any) {
               ${meanings && meanings.length > 1 ? `
                 <div class="carousel__button--prev"><img src="${prev}" /></div>
                   <div style="display: flex; gap:10px;">
-                    ${meanings.map((_: any, index: number)=>`<div class="dot ${index === 0 ? "active": ""}"></div>`).join('')}
+                    ${meanings.map((_: any, index: number) => `<div class="dot ${index === 0 ? "active" : ""}"></div>`).join('')}
                   </div>
                 <div class="carousel__button--next"><img src="${next}"/></div>
-                ` :""}
+                ` : ""}
               </div>
             </div>
           </div>`;
