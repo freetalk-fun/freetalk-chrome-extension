@@ -137,11 +137,11 @@ const rules = `
 
 let itemClassName = "carousel__photo";
 let dotsClassName = "dot";
-let items = document.getElementsByClassName(itemClassName);
-let totalItems = items.length;
+let items: HTMLCollectionOf<Element>;
+let totalItems: number;
 let slide = 0;
 let moving = true;
-let dots = document.getElementsByClassName(dotsClassName);
+let dots: HTMLCollectionOf<Element>;
 
 // Set classes
 function setInitialClasses() {
@@ -155,26 +155,35 @@ function setInitialClasses() {
   } else if (totalItems === 1) {
     if (items[0]) items[0].classList.add("active");
   }
+  console.log("setInitialClasses")
 }
 
 // Set event listeners
-function setEventListeners() {
-  const next = document.getElementsByClassName("carousel__button--next")[0];
-  const prev = document.getElementsByClassName("carousel__button--prev")[0];
+function setEventListeners(shadowRoot: ShadowRoot) {
+  const next = shadowRoot.querySelector(".carousel__button--next");
+  const prev = shadowRoot.querySelector(".carousel__button--prev");
   
   if (next) {
+    console.log("Next button found");
     next.addEventListener("click", moveNext);
+  } else {
+    console.log("Next button not found");
   }
   
   if (prev) {
+    console.log("Prev button found");
     prev.addEventListener("click", movePrev);
+  } else {
+    console.log("Prev button not found");
   }
 }
 
 // Next navigation handler
 function moveNext() {
+  console.log("moveNext called");
   // Check if moving
   if (!moving) {
+    console.log("Moving to next slide");
     dots[slide].className = dotsClassName;
     if (slide === totalItems - 1) {
       slide = 0;
@@ -183,13 +192,15 @@ function moveNext() {
     }
     dots[slide].className = dotsClassName + " active";
     moveCarouselTo(slide);
-    applyFadeInAnimation()
+    applyFadeInAnimation();
   }
 }
 
 // Previous navigation handler
 function movePrev() {
+  console.log("movePrev called");
   if (!moving) {
+    console.log("Moving to previous slide");
     dots[slide].className = dotsClassName;
     if (slide === 0) {
       slide = totalItems - 1;
@@ -198,13 +209,13 @@ function movePrev() {
     }
     dots[slide].className = dotsClassName + " active";
     moveCarouselTo(slide);
-    applyFadeInAnimation()
+    applyFadeInAnimation();
   }
 }
 
 function applyFadeInAnimation() {
   const elementsToFadeIn = document.querySelectorAll('.carousel__photo .elementToFadeInAndOut');
-  elementsToFadeIn.forEach((el, index) => {
+  elementsToFadeIn.forEach((el) => {
     el.classList.remove('fade-in'); // Reset the animation
     //@ts-ignore
     void el.offsetWidth; // Trigger reflow
@@ -224,6 +235,7 @@ function disableInteraction() {
 }
 
 function moveCarouselTo(slide: number) {
+  console.log("moveCarouselTo called with slide:", slide);
   // Check if carousel is moving, if not, allow interaction
   if (!moving) {
     // temporarily disable interactivity
@@ -231,15 +243,15 @@ function moveCarouselTo(slide: number) {
     // Update the "old" adjacent slides with "new" ones
     var newPrevious = slide - 1,
       newNext = slide + 1,
-      oldPrevious = slide - 2 < 0 ? 0 : slide - 2,
-      oldNext = slide + 2 >= totalItems ? totalItems - 1 : slide + 2;
+      oldPrevious = slide - 2 < 0 ? totalItems - 1 : slide - 2,
+      oldNext = slide + 2 >= totalItems ? 0 : slide + 2;
     // Test if carousel has more than three items
     if (totalItems > 1) {
       // Checks and updates if the new slides are out of bounds
-      if (newPrevious <= 0) {
-        oldPrevious = totalItems - 1;
-      } else if (newNext >= totalItems - 1) {
-        oldNext = 0;
+      if (newPrevious < 0) {
+        newPrevious = totalItems - 1;
+      } else if (newNext >= totalItems) {
+        newNext = 0;
       }
 
       // Checks and updates if slide is at the beginning/end
@@ -271,9 +283,8 @@ function initCarousel() {
   dots = document.getElementsByClassName(dotsClassName);
   totalItems = items.length;
   setInitialClasses();
-  setEventListeners();
-  // Set moving to false so that the carousel becomes interactive
   moving = false;
+  console.log("from initCarousel:", items, dots)
 }
 
 export function generateTooltipContent(data: any) {
@@ -309,7 +320,7 @@ export function generateTooltipContent(data: any) {
     });
   }
   
-  return `<div class="carousel-wrapper">
+  const tooltipContent = `<div class="carousel-wrapper">
             <div class="carousel">
               ${meaningsHTML}
               <div style="display: flex; justify-content: center; align-items:center; position: relative; gap:10px; margin-top:10px;" >
@@ -323,6 +334,9 @@ export function generateTooltipContent(data: any) {
               </div>
             </div>
           </div>`;
+
+  console.log("Generated tooltip content:", tooltipContent);
+  return tooltipContent;
 }
 
 // ...existing code...
@@ -376,7 +390,7 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     const tooltipElement = document.createElement("div");
     tooltipElement.id = "tooltip";
     tooltipElement.style.pointerEvents = "auto";
-    tooltipElement.style.position = "absolute"; // Ensure absolute positioning
+    tooltipElement.style.position = "absolute"; 
     shadowRoot.appendChild(tooltipElement);
 
     try {
@@ -395,26 +409,41 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
         allowHTML: true,
         theme: "freetalk",
         trigger: "manual",
+        onCreate(instance) {
+          console.log("Executed onShown");
+          updateTooltipPosition();
+          // initCarousel();
+          // setEventListeners(shadowRoot);
+        },
         onHidden(instance) {
           instance.destroy();
           shadowContainer.remove();
           window.removeEventListener("scroll", updateTooltipPosition);
+          console.log("onHidden executed");
         },
+        // This is logic to make the tooltip switch its content as it updates.
+        // setContent(content: string) {
+        //   instance.setContent("<div>my temporary content</div>");
+        //   console.log("setContent executed");
+        //   // updateTooltipPosition();
+        //   // initCarousel();
+        //   // setEventListeners(shadowRoot);
+        // }
       });
 
-      // Position the tooltip below the selected text
-      updateTooltipPosition();
+      // Create the tooltip
       instance.show();
+      setEventListeners(shadowRoot); 
+      initCarousel();
 
       // Add scroll event listener to update the tooltip's position on scroll
-      // window.addEventListener("scroll", updateTooltipPosition);
+      window.addEventListener("scroll", updateTooltipPosition);
+
     } catch (error) {
       console.error("Error sending message to background script:", error);
       shadowContainer.remove();
     }
   }
-
-  initCarousel();
 });
 
 export {};
