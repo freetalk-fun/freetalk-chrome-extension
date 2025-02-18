@@ -279,19 +279,16 @@ function initCarousel() {
 export function generateTooltipContent(data: any) {
   const term = data?.term;
   const meanings = data?.meanings;
-  const message = data?.message;
 
   console.log("term within genContent:", term);
   console.log("meanings within genContent:", meanings);
-  console.log("message within genContent:", message);
 
-  if (!data) return ``;
+  if (!meanings) {
+    return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">This is not in the FreeTalk Dictionary!</div>`;;
+  }
+
   let termHeader = "";
   let meaningsHTML = "";
-  
-  if (message) {
-    return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">This word is not in the FreeTalk Dictionary!</div>`;
-  }
   
   if (term) {
     termHeader += `<h3 style="font-size: 22px; margin: 0 0 12px 0; color: black; font-weight: 700;">
