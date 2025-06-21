@@ -3,62 +3,91 @@ import tippy from "tippy.js";
 import next from "../../src/assets/nextarrow.png";
 import prev from "../../src/assets/prevarrow.png";
 
-const rules = `
-  .tippy-box[data-theme="freetalk"] {
-    font-family: Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif;
-    background-color: #F9F9F9;
-    color: #2E2E2E;
-    border: 2px solid #d9d9d9;
-    padding: 22px 50px 22px 50px;
-    border-radius: 6px;
-    min-width: 400px;
-    max-width: 100%;
-    white-space: normal;
-    text-align: left;
-    display: block;
-    overflow: visible;
-    z-index: 10000;
-    visibility: visible; /* Ensure the tooltip is visible */
-  }
+const cssRules = [
+  {
+    selector: '.tippy-box[data-theme="freetalk"]',
+    style: {
+      fontFamily: 'Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif',
+      backgroundColor: '#F9F9F9',
+      color: '#2E2E2E',
+      border: '2px solid #d9d9d9',
+      padding: '22px 50px 22px 50px',
+      borderRadius: '6px',
+      minWidth: '400px',
+      maxWidth: '100%',
+      whiteSpace: 'normal',
+      textAlign: 'left',
+      display: 'block',
+      overflow: 'visible',
+      zIndex: '10000',
+      visibility: 'visible',
+    },
+  },
+  {
+    selector: '.carousel__photo',
+    style: {
+      display: 'none',
+      opacity: '0',
+      position: 'absolute',
+      top: '0',
+      width: '100%',
+      margin: 'auto',
+      zIndex: '7000',
+      transition: 'opacity 0.3s ease-in-out',
+    },
+  },
+  {
+    selector: '.carousel__photo.active',
+    style: {
+      display: 'block',
+      opacity: '1',
+      position: 'relative',
+      zIndex: '9000',
+    },
+  },
+  {
+    selector: '.carousel__button--prev, .carousel__button--next',
+    style: {
+      width: '12px',
+      cursor: 'pointer',
+      zIndex: '10000',
+      paddingTop: '3px',
+    },
+  },
+  {
+    selector: '.dot',
+    style: {
+      height: '10px',
+      width: '10px',
+      backgroundColor: '#bbb',
+      borderRadius: '50%',
+      display: 'inline-block',
+    },
+  },
+  {
+    selector: '.dot.active',
+    style: {
+      backgroundColor: '#000',
+    },
+  },
+];
 
-  .carousel__photo {
-    display: none; /* Hide all slides by default */
-    opacity: 0; /* Ensure hidden slides are not visible */
-    position: absolute;
-    top: 0;
-    width: 100%;
-    margin: auto;
-    z-index: 7000;
-    transition: opacity 0.3s ease-in-out;
+// Helper to inject styles into a shadow root
+function injectStyles(shadowRoot: any, cssRules: any) {
+  const style = document.createElement('style');
+  let css = '';
+  for (const rule of cssRules) {
+    css += `${rule.selector} {`;
+    for (const [key, value] of Object.entries(rule.style)) {
+      // Convert camelCase to kebab-case
+      const kebabKey = key.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+      css += `${kebabKey}: ${value};`;
+    }
+    css += '}';
   }
-
-  .carousel__photo.active {
-    display: block;
-    opacity: 1;
-    position: relative;
-    z-index: 9000;
-  }
-
-  .carousel__button--prev,
-  .carousel__button--next {
-    width: 12px;
-    cursor: pointer;
-    z-index: 10000;
-    padding-top: 3px;
-  }
-
-  .dot {
-    height: 10px;
-    width: 10px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  .dot.active {
-    background-color: #000;
-  }
-`;
+  style.textContent = css;
+  shadowRoot.appendChild(style);
+}
 
 class Carousel {
   private currentSlide: number = 0;
@@ -88,6 +117,8 @@ class Carousel {
   private showSlide(index: number) {
     this.slides.forEach((slide, i) => {
       (slide as HTMLElement).style.display = i === index ? "block" : "none";
+      (slide as HTMLElement).style.position = i === index ? "relative" : "absolute";
+      (slide as HTMLElement).style.opacity = i === index ? "1" : "0";
     });
 
     this.dots.forEach((dot, i) => {
@@ -107,51 +138,122 @@ class Carousel {
 }
 
 export function generateTooltipContent(data: any) {
+  console.log(data);
+
   const term = data?.term;
   const meanings = data?.meanings;
 
+  // word not found 
   if (!meanings || meanings.length === 0) {
-    return `<div style="text-align: center; margin: auto; font-size: 24px; font-weight: 700;">This is not in the FreeTalk Dictionary!</div>`;
+    const notFoundDiv = document.createElement("div");
+    notFoundDiv.style.textAlign = "center";
+    notFoundDiv.style.margin = "auto";
+    notFoundDiv.style.fontSize = "24px";
+    notFoundDiv.style.fontWeight = "700";
+    notFoundDiv.textContent = "This is not in the FreeTalk Dictionary!";
+    return notFoundDiv;
   }
 
-  let termHeader = "";
-  let meaningsHTML = "";
+  // Carousel wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "carousel-wrapper";
+  wrapper.style.fontFamily = "Product-Brand-Grotesque, Roboto, Helvetica, Arial, sans-serif";
 
-  if (term) {
-    termHeader = `<h3 style="font-size: 22px; margin: 0 0 12px 0; color: black; font-weight: 700;">
-                    ${term.charAt(0).toUpperCase() + term.slice(1)}
-                  </h3>`;
-  }
 
+  // Carousel
+  const carousel = document.createElement("div");
+  carousel.className = "carousel";
+  wrapper.appendChild(carousel);
+
+  // Slides
   meanings.forEach((meaning: any, index: number) => {
-    meaningsHTML += `
-      <div class="carousel__photo" style="display: ${index === 0 ? "block" : "none"};">
-        <div style="display:flex; justify-content: space-between; font-family: Product-Brand-Grotesque-Regular; font-weight:700;">
-          ${termHeader}
-          <p style="font-size: 16px; color: black; margin: 0;">${meaning.pos}</p>
-        </div>
-        <p style="font-family:Product-Brand-Grotesque-Light;text-align: left; font-size: 16px; line-height: 1.2; font-weight: 390; color: black; margin: 0; padding-top:23px;">${meaning.definition}</p>
-      </div>`;
+    const slide = document.createElement("div");
+    slide.className = "carousel__photo";
+    if (index === 0) slide.classList.add("active");
+
+    // Header row
+    const headerRow = document.createElement("div");
+    headerRow.style.display = "flex";
+    headerRow.style.justifyContent = "space-between";
+    headerRow.style.fontWeight = "700";
+
+    if (term) {
+      const termHeader = document.createElement("h3");
+      termHeader.style.fontSize = "22px";
+      termHeader.style.margin = "0 0 12px 0";
+      termHeader.style.color = "black";
+      termHeader.style.fontWeight = "700";
+      termHeader.textContent = term.charAt(0).toUpperCase() + term.slice(1);
+      headerRow.appendChild(termHeader);
+    }
+
+    const pos = document.createElement("p");
+    pos.style.fontSize = "16px";
+    pos.style.color = "black";
+    pos.style.margin = "0";
+    pos.textContent = meaning.pos;
+    headerRow.appendChild(pos);
+
+    slide.appendChild(headerRow);
+
+    // Definition
+    const def = document.createElement("p");
+    def.style.textAlign = "left";
+    def.style.fontSize = "16px";
+    def.style.lineHeight = "1.2";
+    def.style.fontWeight = "390";
+    def.style.color = "black";
+    def.style.margin = "0";
+    def.style.paddingTop = "23px";
+    def.textContent = meaning.definition;
+    slide.appendChild(def);
+
+    carousel.appendChild(slide);
   });
 
-  const tooltipContent = `
-    <div class="carousel-wrapper">
-      <div class="carousel">
-        ${meaningsHTML}
-        <div style="display: flex; justify-content: center; align-items:center; position: relative; gap:10px; margin-top:10px;">
-          ${meanings.length > 1 ? `
-            <div class="carousel__button--prev"><img src="${prev}" /></div>
-            <div style="display: flex; gap:10px;">
-              ${meanings.map((_: unknown, index: number) => `<div class="dot ${index === 0 ? "active" : ""}"></div>`).join('')}
-            </div>
-            <div class="carousel__button--next"><img src="${next}"/></div>
-          ` : ""}
-        </div>
-      </div>
-    </div>`;
+  // Controls (if more than one meaning)
+  if (meanings.length > 1) {
+    const controls = document.createElement("div");
+    controls.style.display = "flex";
+    controls.style.justifyContent = "center";
+    controls.style.alignItems = "center";
+    controls.style.position = "relative";
+    controls.style.gap = "10px";
+    controls.style.marginTop = "10px";
 
-  console.log("Generated tooltip content:", tooltipContent);
-  return tooltipContent;
+    // Prev button
+    const prevBtn = document.createElement("div");
+    prevBtn.className = "carousel__button--prev";
+    const prevImg = document.createElement("img");
+    prevImg.src = prev;
+    prevBtn.appendChild(prevImg);
+    controls.appendChild(prevBtn);
+
+    // Dots
+    const dotsContainer = document.createElement("div");
+    dotsContainer.style.display = "flex";
+    dotsContainer.style.gap = "10px";
+    meanings.forEach((_: unknown, index: number) => {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      if (index === 0) dot.classList.add("active");
+      dotsContainer.appendChild(dot);
+    });
+    controls.appendChild(dotsContainer);
+
+    // Next button
+    const nextBtn = document.createElement("div");
+    nextBtn.className = "carousel__button--next";
+    const nextImg = document.createElement("img");
+    nextImg.src = next;
+    nextBtn.appendChild(nextImg);
+    controls.appendChild(nextBtn);
+
+    carousel.appendChild(controls);
+  }
+
+  console.log("Generated tooltip content (DOM):", wrapper);
+  return wrapper;
 }
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
@@ -178,7 +280,7 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     const shadowRoot = shadowContainer.attachShadow({ mode: "open" });
 
     const styleElement = document.createElement("style");
-    styleElement.textContent = rules;
+    injectStyles(shadowRoot, cssRules);
     shadowRoot.appendChild(styleElement);
 
     const tooltipElement = document.createElement("div");
@@ -202,10 +304,10 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       const instance = tippy(tooltipElement, {
         content: tooltipHTML, // <-- GOOD: set real content at creation
         hideOnClick: true,
+        trigger: "click",
         interactive: true,
         allowHTML: true,
         theme: "freetalk",
-        trigger: "manual",
         onCreate(instance) {
           updateTooltipPosition();
         },
