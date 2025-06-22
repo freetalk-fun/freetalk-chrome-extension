@@ -24,7 +24,7 @@ const cssRules = [
     },
   },
   {
-    selector: '.carousel__photo',
+    selector: '.carousel__content',
     style: {
       display: 'none',
       opacity: '0',
@@ -37,7 +37,7 @@ const cssRules = [
     },
   },
   {
-    selector: '.carousel__photo.active',
+    selector: '.carousel__content.active',
     style: {
       display: 'block',
       opacity: '1',
@@ -73,7 +73,7 @@ const cssRules = [
 ];
 
 // Helper to inject styles into a shadow root
-function injectStyles(shadowRoot: any, cssRules: any) {
+function injectStyles(shadowRoot: ShadowRoot, cssRules: any) {
   const style = document.createElement('style');
   let css = '';
   for (const rule of cssRules) {
@@ -95,7 +95,7 @@ class Carousel {
   private dots: NodeListOf<Element>;
 
   constructor(private shadowRoot: ShadowRoot) {
-    this.slides = shadowRoot.querySelectorAll(".carousel__photo");
+    this.slides = shadowRoot.querySelectorAll(".carousel__content");
     this.dots = shadowRoot.querySelectorAll(".dot");
 
     console.log("Slides found:", this.slides);
@@ -113,12 +113,9 @@ class Carousel {
     nextButton?.addEventListener("click", () => this.nextSlide());
     prevButton?.addEventListener("click", () => this.prevSlide());
   }
-
   private showSlide(index: number) {
     this.slides.forEach((slide, i) => {
-      (slide as HTMLElement).style.display = i === index ? "block" : "none";
-      (slide as HTMLElement).style.position = i === index ? "relative" : "absolute";
-      (slide as HTMLElement).style.opacity = i === index ? "1" : "0";
+      slide.classList.toggle("active", i === index);
     });
 
     this.dots.forEach((dot, i) => {
@@ -168,7 +165,7 @@ export function generateTooltipContent(data: any) {
   // Slides
   meanings.forEach((meaning: any, index: number) => {
     const slide = document.createElement("div");
-    slide.className = "carousel__photo";
+    slide.className = "carousel__content";
     if (index === 0) slide.classList.add("active");
 
     // Header row
@@ -261,6 +258,12 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   const selectedText = selection?.toString().trim();
 
   if (selection?.type === "Range" && selection.rangeCount > 0 && selectedText) {
+
+    // Always remove any previous tooltip
+    const prevTooltip = document.getElementById('freetalk-tooltip-anchor');
+    if (prevTooltip) prevTooltip.remove();
+
+
     const shadowContainer = document.createElement("div");
     shadowContainer.style.position = "absolute";
     shadowContainer.style.top = "0";
@@ -269,13 +272,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     shadowContainer.style.height = "100%";
     shadowContainer.style.zIndex = "10000";
     document.body.appendChild(shadowContainer);
-
-    const updateTooltipPosition = () => {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
-      shadowContainer.style.left = `${rect.left}px`;
-    };
 
     const shadowRoot = shadowContainer.attachShadow({ mode: "open" });
 
@@ -296,13 +292,25 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           text: selectedText.toLowerCase(),
         },
       });
-
       console.log("Received data:", data);
 
-      const tooltipHTML = generateTooltipContent(data);
+      const updateTooltipPosition = () => {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
+        shadowContainer.style.left = `${rect.left}px`;
+      };
 
+      const handleClickOutside = (e: Event) => {
+        if (!shadowContainer.contains(e.target as Node)) {
+          instance.hide();
+          shadowContainer.remove();
+        }
+      }
+
+      const tooltipHTML = generateTooltipContent(data);
       const instance = tippy(tooltipElement, {
-        content: tooltipHTML, // <-- GOOD: set real content at creation
+        content: tooltipHTML,
         hideOnClick: true,
         trigger: "click",
         interactive: true,
@@ -315,13 +323,16 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           instance.destroy();
           shadowContainer.remove();
           window.removeEventListener("scroll", updateTooltipPosition);
-        },
+          window.removeEventListener("click", handleClickOutside);
+        }
       });
 
       instance.show();
       new Carousel(shadowRoot);
 
       window.addEventListener("scroll", updateTooltipPosition);
+      window.addEventListener("click", handleClickOutside);
+
     } catch (error) {
       console.error("Error sending message to background script:", error);
       shadowContainer.remove();
