@@ -254,6 +254,7 @@ export function generateTooltipContent(data: any) {
 }
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
+
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
 
@@ -263,8 +264,8 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
     const prevTooltip = document.getElementById('freetalk-tooltip-anchor');
     if (prevTooltip) prevTooltip.remove();
 
-
     const shadowContainer = document.createElement("div");
+
     shadowContainer.style.position = "absolute";
     shadowContainer.style.top = "0";
     shadowContainer.style.left = "0";
@@ -302,7 +303,10 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       };
 
       const handleClickOutside = (e: Event) => {
-        if (!shadowContainer.contains(e.target as Node)) {
+
+        // shadowRoot.getElementById("tooltip")?.contains(e.target as Node)
+
+        if (!shadowRoot.contains(e.target as Node)) {
           instance.hide();
           shadowContainer.remove();
         }
@@ -324,12 +328,25 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           shadowContainer.remove();
           window.removeEventListener("scroll", updateTooltipPosition);
           window.removeEventListener("click", handleClickOutside);
+          window.removeEventListener("keydown", handleEsc);
         }
       });
 
       instance.show();
       new Carousel(shadowRoot);
 
+      // ...inside your try block, after showing the tooltip...
+      const handleEsc = (e: KeyboardEvent): void => {
+        if (e.key === "Escape") {
+          instance.hide();
+          shadowContainer.remove();
+          window.removeEventListener("keydown", handleEsc);
+          window.removeEventListener("scroll", updateTooltipPosition);
+          window.removeEventListener("click", handleClickOutside);
+        }
+      };
+
+      window.addEventListener("keydown", handleEsc);
       window.addEventListener("scroll", updateTooltipPosition);
       window.addEventListener("click", handleClickOutside);
 
