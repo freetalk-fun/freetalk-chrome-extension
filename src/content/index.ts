@@ -260,32 +260,22 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
 
   if (selection?.type === "Range" && selection.rangeCount > 0 && selectedText) {
 
-    // Always remove any previous tooltip
-    const prevTooltip = document.getElementById('freetalk-tooltip-anchor');
-    if (prevTooltip) prevTooltip.remove();
-
+    // Create Shadow DOM add CSS
     const shadowContainer = document.createElement("div");
-
+    shadowContainer.id = "freetalk-tooltip-anchor"; // Not sure I need this?
     shadowContainer.style.position = "absolute";
-    shadowContainer.style.top = "0";
-    shadowContainer.style.left = "0";
-    shadowContainer.style.width = "100%";
-    shadowContainer.style.height = "100%";
     shadowContainer.style.zIndex = "10000";
     document.body.appendChild(shadowContainer);
-
     const shadowRoot = shadowContainer.attachShadow({ mode: "open" });
-
-    const styleElement = document.createElement("style");
     injectStyles(shadowRoot, cssRules);
-    shadowRoot.appendChild(styleElement);
 
+    // Add Tooltip's anchor div
     const tooltipElement = document.createElement("div");
     tooltipElement.id = "tooltip";
-    tooltipElement.style.pointerEvents = "auto";
     tooltipElement.style.position = "absolute";
     shadowRoot.appendChild(tooltipElement);
 
+    // Add Tooltip
     try {
       const data = await browser.runtime.sendMessage({
         type: "openPopup",
@@ -293,7 +283,14 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           text: selectedText.toLowerCase(),
         },
       });
+
       console.log("Received data:", data);
+
+      // const handleClickOutside = (e: Event) => {
+      //   console.log("Clicked Outside Tooltip:", e.target);
+      // };
+
+      const tooltipHTML = generateTooltipContent(data);
 
       const updateTooltipPosition = () => {
         const range = selection.getRangeAt(0);
@@ -302,17 +299,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
         shadowContainer.style.left = `${rect.left}px`;
       };
 
-      const handleClickOutside = (e: Event) => {
-
-        // shadowRoot.getElementById("tooltip")?.contains(e.target as Node)
-
-        if (!shadowRoot.contains(e.target as Node)) {
-          instance.hide();
-          shadowContainer.remove();
-        }
-      }
-
-      const tooltipHTML = generateTooltipContent(data);
       const instance = tippy(tooltipElement, {
         content: tooltipHTML,
         hideOnClick: true,
@@ -324,8 +310,9 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           updateTooltipPosition();
         },
         onHidden(instance) {
-          instance.destroy();
-          shadowContainer.remove();
+          // instance.hide();
+          // instance.destroy();
+          // shadowContainer.remove();
           window.removeEventListener("scroll", updateTooltipPosition);
           window.removeEventListener("click", handleClickOutside);
           window.removeEventListener("keydown", handleEsc);
@@ -338,18 +325,29 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       // ...inside your try block, after showing the tooltip...
       const handleEsc = (e: KeyboardEvent): void => {
         if (e.key === "Escape") {
-          instance.hide();
-          shadowContainer.remove();
+          // instance.hide();
+          // shadowContainer.remove();
           window.removeEventListener("keydown", handleEsc);
           window.removeEventListener("scroll", updateTooltipPosition);
           window.removeEventListener("click", handleClickOutside);
         }
       };
 
+      // Add this to prevent clicks inside the tooltip from bubbling up
+      // shadowRoot.addEventListener("click", (e) => {
+      //   e.stopPropagation();
+      //   // e.target will be the actual clicked element inside the tooltip
+      //   console.log("Clicked Inside Tooltip:", e.target);
+      //   // instance.hide();
+      // });
+
+      document.addEventListener("click", () => {
+        shadowContainer.remove();
+      });
+
       window.addEventListener("keydown", handleEsc);
       window.addEventListener("scroll", updateTooltipPosition);
-      window.addEventListener("click", handleClickOutside);
-
+      // window.addEventListener("click", handleClickOutside);
     } catch (error) {
       console.error("Error sending message to background script:", error);
       shadowContainer.remove();
