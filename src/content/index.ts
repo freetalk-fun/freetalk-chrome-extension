@@ -286,10 +286,6 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
 
       console.log("Received data:", data);
 
-      // const handleClickOutside = (e: Event) => {
-      //   console.log("Clicked Outside Tooltip:", e.target);
-      // };
-
       const tooltipHTML = generateTooltipContent(data);
 
       const updateTooltipPosition = () => {
@@ -310,11 +306,9 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
           updateTooltipPosition();
         },
         onHidden(instance) {
-          // instance.hide();
           // instance.destroy();
-          // shadowContainer.remove();
+          shadowContainer.remove();
           window.removeEventListener("scroll", updateTooltipPosition);
-          window.removeEventListener("click", handleClickOutside);
           window.removeEventListener("keydown", handleEsc);
         }
       });
@@ -325,26 +319,24 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       // ...inside your try block, after showing the tooltip...
       const handleEsc = (e: KeyboardEvent): void => {
         if (e.key === "Escape") {
-          // instance.hide();
-          // shadowContainer.remove();
+          shadowContainer.remove();
           window.removeEventListener("keydown", handleEsc);
           window.removeEventListener("scroll", updateTooltipPosition);
-          window.removeEventListener("click", handleClickOutside);
         }
       };
 
       // Add this to prevent clicks inside the tooltip from bubbling up
-      // shadowRoot.addEventListener("click", (e) => {
-      //   e.stopPropagation();
-      //   // e.target will be the actual clicked element inside the tooltip
-      //   console.log("Clicked Inside Tooltip:", e.target);
-      //   // instance.hide();
-      // });
+      const preventTooltipClickPropagation = (shadowRoot: ShadowRoot): void => {
+        shadowRoot.addEventListener("click", (e) => {
+          e.stopPropagation();
+          console.log("Clicked Inside Tooltip:", e.target);
+        });
+      };
 
-      document.addEventListener("click", () => {
-        shadowContainer.remove();
-      });
+      preventTooltipClickPropagation(shadowRoot);
 
+
+      document.addEventListener("click", () => { shadowContainer.remove() });
       window.addEventListener("keydown", handleEsc);
       window.addEventListener("scroll", updateTooltipPosition);
       // window.addEventListener("click", handleClickOutside);
