@@ -1,5 +1,4 @@
 import * as browsers from 'webextension-polyfill';
-// import { DIRECTUS_URL } from "../environment";
 
 export const getMeaning = async (searchWord: string) => {
   try {
