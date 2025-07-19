@@ -253,7 +253,11 @@ export function generateTooltipContent(data: any) {
   return wrapper;
 }
 
+
+
+
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
+
 
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
@@ -327,14 +331,12 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
 
       // Add this to prevent clicks inside the tooltip from bubbling up
       const preventTooltipClickPropagation = (shadowRoot: ShadowRoot): void => {
-        shadowRoot.addEventListener("click", (e) => {
-          e.stopPropagation();
-          console.log("Clicked Inside Tooltip:", e.target);
-        });
+        ["click", "dblclick"].forEach(event =>
+          shadowRoot.addEventListener(event, e => e.stopPropagation())
+        );
       };
 
       preventTooltipClickPropagation(shadowRoot);
-
 
       document.addEventListener("click", () => { shadowContainer.remove() });
       window.addEventListener("keydown", handleEsc);
