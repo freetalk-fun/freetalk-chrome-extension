@@ -1,12 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "My Extension",
+  "name": "FreeTalk Dictionary",
   "version": "1.0.0",
-  "description": "A simple Chrome extension with React.",
+  "description": "Double-click any word to get its definition.",
   "icons": {
-    "16": "favicon2.png",
-    "48": "favicon2.png",
-    "128": "favicon2.png"
+    "16": "favicon32.png",
+    "48": "favicon48.png",
+    "128": "favicon128.png"
+  },
+  "action": {
+    "default_popup": "index.html"
   },
   "background": {
     "service_worker": "./static/js/background.js"
@@ -17,11 +20,9 @@
       "js": ["./static/js/content.js"]
     }
   ],
+  "permissions": [],
+  "host_permissions": ["https://api.freetalk.fun/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
-  },
-  "action": {
-    "default_popup": "index.html"
-  },
-  "permissions": ["storage", "tabs", "scripting"]
+  }
 }

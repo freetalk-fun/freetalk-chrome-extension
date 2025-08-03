@@ -253,7 +253,10 @@ export function generateTooltipContent(data: any) {
   return wrapper;
 }
 
+
+
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
+
 
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();

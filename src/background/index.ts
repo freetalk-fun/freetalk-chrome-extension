@@ -5,7 +5,6 @@ export const getMeaning = async (searchWord: string) => {
     const response = await fetch(`https://api.freetalk.fun/search-term?term=${encodeURIComponent(searchWord)}`, {
       method: 'GET',
       headers: {
-        'auth-token': `my-secret-token`,
         'Content-Type': 'application/json',
       },
     });
