@@ -9,6 +9,6 @@ FreeTalk.fun values your privacy. This extension:
 - Uses **no permissions** beyond what Chrome requires to install and run.
 - Shares **nothing** with third parties.
 
-Future versions may introduce optional features. If that happens, this policy will be updated to clearly explain any changes.  
-
-If you have questions or concerns, contact: [your email or support link]
+Future versions may introduce features which require permissions.
+If that happens, this policy will be updated to clearly explain any changes.  
+If you have questions or concerns, contact: erondpowell@gmail.com
