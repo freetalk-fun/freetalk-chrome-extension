@@ -10,5 +10,7 @@ FreeTalk.fun values your privacy. This extension:
 - Shares **nothing** with third parties.
 
 Future versions may introduce features which require permissions.
-If that happens, this policy will be updated to clearly explain any changes.  
+
+If that happens, this policy will be updated to explain the changes.  
+
 If you have questions or concerns, contact: erondpowell@gmail.com
