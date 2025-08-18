@@ -1,321 +1,351 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
-import { generateTooltipContentOld } from "../helpers/generateTooltipContent";
+import next from "../../src/assets/nextarrow.png";
+import prev from "../../src/assets/prevarrow.png";
 
-const freetalkClass = document.createElement("style");
-const sliderScript = document.createElement("script");
+const cssRules = [
+  {
+    selector: '.tippy-box[data-theme="freetalk"]',
+    style: {
+      fontFamily: 'Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif',
+      backgroundColor: '#F9F9F9',
+      color: '#2E2E2E',
+      border: '2px solid #d9d9d9',
+      padding: '22px 50px 22px 50px',
+      borderRadius: '6px',
+      minWidth: '400px',
+      maxWidth: '100%',
+      whiteSpace: 'normal',
+      textAlign: 'left',
+      display: 'block',
+      overflow: 'visible',
+      zIndex: '10000',
+      visibility: 'visible',
+    },
+  },
+  {
+    selector: '.carousel__content',
+    style: {
+      display: 'none',
+      opacity: '0',
+      position: 'absolute',
+      top: '0',
+      width: '100%',
+      margin: 'auto',
+      zIndex: '7000',
+      transition: 'opacity 0.3s ease-in-out',
+    },
+  },
+  {
+    selector: '.carousel__content.active',
+    style: {
+      display: 'block',
+      opacity: '1',
+      position: 'relative',
+      zIndex: '9000',
+    },
+  },
+  {
+    selector: '.carousel__button--prev, .carousel__button--next',
+    style: {
+      width: '12px',
+      cursor: 'pointer',
+      zIndex: '10000',
+      paddingTop: '3px',
+    },
+  },
+  {
+    selector: '.dot',
+    style: {
+      height: '10px',
+      width: '10px',
+      backgroundColor: '#bbb',
+      borderRadius: '50%',
+      display: 'inline-block',
+    },
+  },
+  {
+    selector: '.dot.active',
+    style: {
+      backgroundColor: '#000',
+    },
+  },
+];
 
-const rules = `
-    .tippy-box[data-theme="freetalk"] {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: #F9F9F9;
-      color: #2E2E2E;
-      border: 2px solid #d9d9d9;
-      padding: 22px 50px 22px 50px;
-      border-radius: 6px;
-      min-width: 400px;
-      max-width: 100%;
-      white-space: normal;
-      text-align: left;
+// Helper to inject styles into a shadow root
+function injectStyles(shadowRoot: ShadowRoot, cssRules: any) {
+  const style = document.createElement('style');
+  let css = '';
+  for (const rule of cssRules) {
+    css += `${rule.selector} {`;
+    for (const [key, value] of Object.entries(rule.style)) {
+      // Convert camelCase to kebab-case
+      const kebabKey = key.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+      css += `${kebabKey}: ${value};`;
+    }
+    css += '}';
+  }
+  style.textContent = css;
+  shadowRoot.appendChild(style);
+}
+
+class Carousel {
+  private currentSlide: number = 0;
+  private slides: NodeListOf<Element>;
+  private dots: NodeListOf<Element>;
+
+  constructor(private shadowRoot: ShadowRoot) {
+    this.slides = shadowRoot.querySelectorAll(".carousel__content");
+    this.dots = shadowRoot.querySelectorAll(".dot");
+
+    console.log("Slides found:", this.slides);
+    console.log("Dots found:", this.dots);
+
+    this.init();
+  }
+
+  private init() {
+    this.showSlide(this.currentSlide);
+
+    const nextButton = this.shadowRoot.querySelector(".carousel__button--next");
+    const prevButton = this.shadowRoot.querySelector(".carousel__button--prev");
+
+    nextButton?.addEventListener("click", () => this.nextSlide());
+    prevButton?.addEventListener("click", () => this.prevSlide());
+  }
+  private showSlide(index: number) {
+    this.slides.forEach((slide, i) => {
+      slide.classList.toggle("active", i === index);
+    });
+
+    this.dots.forEach((dot, i) => {
+      dot.classList.toggle("active", i === index);
+    });
+  }
+
+  private nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+    this.showSlide(this.currentSlide);
+  }
+
+  private prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+    this.showSlide(this.currentSlide);
+  }
+}
+
+export function generateTooltipContent(data: any) {
+  console.log(data);
+
+  const term = data?.term;
+  const meanings = data?.meanings;
+
+  // word not found 
+  if (!meanings || meanings.length === 0) {
+    const notFoundDiv = document.createElement("div");
+    notFoundDiv.style.textAlign = "center";
+    notFoundDiv.style.margin = "auto";
+    notFoundDiv.style.fontSize = "24px";
+    notFoundDiv.style.fontWeight = "700";
+    notFoundDiv.textContent = "This is not in the FreeTalk Dictionary!";
+    return notFoundDiv;
+  }
+
+  // Carousel wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "carousel-wrapper";
+  wrapper.style.fontFamily = "Product-Brand-Grotesque, Roboto, Helvetica, Arial, sans-serif";
+
+
+  // Carousel
+  const carousel = document.createElement("div");
+  carousel.className = "carousel";
+  wrapper.appendChild(carousel);
+
+  // Slides
+  meanings.forEach((meaning: any, index: number) => {
+    const slide = document.createElement("div");
+    slide.className = "carousel__content";
+    if (index === 0) slide.classList.add("active");
+
+    // Header row
+    const headerRow = document.createElement("div");
+    headerRow.style.display = "flex";
+    headerRow.style.justifyContent = "space-between";
+    headerRow.style.fontWeight = "700";
+
+    if (term) {
+      const termHeader = document.createElement("h3");
+      termHeader.style.fontSize = "22px";
+      termHeader.style.margin = "0 0 12px 0";
+      termHeader.style.color = "black";
+      termHeader.style.fontWeight = "700";
+      termHeader.textContent = term.charAt(0).toUpperCase() + term.slice(1);
+      headerRow.appendChild(termHeader);
     }
 
-    /* Resetting default browser styles */
-    .tippy-toolbox div, .tippy-toolbox span, .tippy-toolbox h1, .tippy-toolbox h2, .tippy-toolbox h3, .tippy-toolbox h4, .tippy-toolbox h5, .tippy-toolbox h6, .tippy-toolbox p, .tippy-toolbox blockquote, .tippy-toolbox pre,
-    .tippy-toolbox a, .tippy-toolbox img, .tippy-toolbox strong, .tippy-toolbox sub, .tippy-toolbox sup, .tippy-toolbox b, .tippy-toolbox u, .tippy-toolbox i, .tippy-toolbox ol, .tippy-toolbox ul, .tippy-toolbox li,
-    .tippy-toolbox form, .tippy-toolbox label,
-    .tippy-toolbox tbody, .tippy-toolbox tfoot, .tippy-toolbox thead, .tippy-toolbox tr, .tippy-toolbox th, .tippy-toolbox td {
-      margin: 0;
-      padding: 0;
-      border: 0;
-      font-size: 100%;
-      font: inherit;
-      vertical-align: baseline;
-      line-height:1;
-  }
+    const pos = document.createElement("p");
+    pos.style.fontSize = "16px";
+    pos.style.color = "black";
+    pos.style.margin = "0";
+    pos.textContent = meaning.pos;
+    headerRow.appendChild(pos);
 
-  .tippy-toolbox ol, .tippy-toolbox ul {
-      list-style: none;
-  }
+    slide.appendChild(headerRow);
 
-  .tippy-toolbox blockquote, .tippy-toolbox q {
-      quotes: none;
-  }
+    // Definition
+    const def = document.createElement("p");
+    def.style.textAlign = "left";
+    def.style.fontSize = "16px";
+    def.style.lineHeight = "1.2";
+    def.style.fontWeight = "390";
+    def.style.color = "black";
+    def.style.margin = "0";
+    def.style.paddingTop = "23px";
+    def.textContent = meaning.definition;
+    slide.appendChild(def);
 
-  .tippy-toolbox blockquote:before, .tippy-toolbox blockquote:after,
-  .tippy-toolbox q:before, .tippy-toolbox q:after {
-      content: '';
-      content: none;
-  }
-
-  .tippy-toolbox table {
-      border-collapse: collapse;
-      border-spacing: 0;
-  }
-
-  .tippy-toolbox h1, h2, h3, h4 {
-    font-weight: 700;
-  }
-
-  .carousel-wrapper {
-    overflow: hidden;
-  }
-  .carousel-wrapper * {
-    box-sizing: border-box;
-  }
-  .carousel {
-    transform-style: preserve-3d;
-  }
-  .carousel__photo {
-    opacity: 0;
-    position: absolute;
-    top:0;
-    width: 100%;
-    margin: auto;
-    padding: 0 30px;
-    z-index: 100;
-    // transition: transform .5s, opacity 1s, z-index .5s;
-  }
-
-  .carousel__photo.initial,
-  .carousel__photo.active {
-    opacity: 1;
-    position: relative;
-    z-index: 900;
-  }
-
-  .carousel__photo.prev,
-  .carousel__photo.next {
-    z-index: 800;
-  }
-  // .carousel__photo.prev {
-  //   transform: translateX(-100%); /* Move 'prev' item to the left */
-  // }
-  // .carousel__photo.next {
-  //   transform: translateX(100%); /* Move 'next' item to the right */
-  // }
-  .carousel__button--prev,
-  .carousel__button--next {
-    width: 12px;
-    cursor: pointer; 
-    z-index: 1001;
-    padding-top:3px
-  }
-  .dot {
-    height: 10px;
-    width: 10px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .dot.active{
-    background-color: #000;
-  }
-.elementToFadeInAndOut {
-  opacity: 0;
-}
-
-.fade-in {
-  -webkit-animation: fadeIn 1s forwards;
-  animation: fadeIn 1s forwards;
-}
-
-@-webkit-keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-`;
-
-let itemClassName = "carousel__photo";
-let dotsClassName = "dot";
-let items = document.getElementsByClassName(itemClassName);
-let totalItems = items.length;
-let slide = 0;
-let moving = true;
-let dots = document.getElementsByClassName(dotsClassName);
-
-// Set classes
-function setInitialClasses() {
-  // Targets the previous, current, and next items
-  // This assumes there are at least three items.
-  items[totalItems - 1].classList.add("prev");
-  items[0].classList.add("active");
-  items[1].classList.add("next");
-}
-// Set event listeners
-function setEventListeners() {
-  let next = document.getElementsByClassName("carousel__button--next")[0],
-    prev = document.getElementsByClassName("carousel__button--prev")[0];
-  next.addEventListener("click", moveNext);
-  prev.addEventListener("click", movePrev);
-}
-
-// Next navigation handler
-function moveNext() {
-  // Check if moving
-  if (!moving) {
-    dots[slide].className = dotsClassName;
-    if (slide === totalItems - 1) {
-      slide = 0;
-    } else {
-      slide++;
-    }
-    dots[slide].className = dotsClassName + " active";
-    moveCarouselTo(slide);
-    applyFadeInAnimation()
-
-  }
-}
-// Previous navigation handler
-function movePrev() {
-  if (!moving) {
-    dots[slide].className = dotsClassName;
-    if (slide === 0) {
-      slide = totalItems - 1;
-    } else {
-      slide--;
-    }
-    dots[slide].className = dotsClassName + " active";
-    moveCarouselTo(slide);
-    applyFadeInAnimation()
-  }
-}
-function applyFadeInAnimation() {
-  const elementsToFadeIn = document.querySelectorAll('.carousel__photo .elementToFadeInAndOut');
-  elementsToFadeIn.forEach((el, index) => {
-    el.classList.remove('fade-in'); // Reset the animation
-    //@ts-ignore
-    void el.offsetWidth; // Trigger reflow
-    //@ts-ignore
-    el.classList.add('fade-in');
+    carousel.appendChild(slide);
   });
-}
 
-function disableInteraction() {
-  // Set 'moving' to true for the same duration as our transition.
-  // (0.5s = 500ms)
+  // Controls (if more than one meaning)
+  if (meanings.length > 1) {
+    const controls = document.createElement("div");
+    controls.style.display = "flex";
+    controls.style.justifyContent = "center";
+    controls.style.alignItems = "center";
+    controls.style.position = "relative";
+    controls.style.gap = "10px";
+    controls.style.marginTop = "10px";
 
-  moving = true;
-  // setTimeout runs its function once after the given time
-  setTimeout(function () {
-    moving = false;
-  }, 500);
-}
+    // Prev button
+    const prevBtn = document.createElement("div");
+    prevBtn.className = "carousel__button--prev";
+    const prevImg = document.createElement("img");
+    prevImg.src = prev;
+    prevBtn.appendChild(prevImg);
+    controls.appendChild(prevBtn);
 
-function moveCarouselTo(slide: number) {
-  // Check if carousel is moving, if not, allow interaction
-  if (!moving) {
-    // temporarily disable interactivity
-    disableInteraction();
-    // Update the "old" adjacent slides with "new" ones
-    var newPrevious = slide - 1,
-      newNext = slide + 1,
-      oldPrevious = slide - 2 < 0 ? 0 : slide - 2,
-      oldNext = slide + 2 >= totalItems ? totalItems - 1 : slide + 2;
-    // Test if carousel has more than three items
-    if (totalItems > 1) {
-      // Checks and updates if the new slides are out of bounds
-      if (newPrevious <= 0) {
-        oldPrevious = totalItems - 1;
-      } else if (newNext >= totalItems - 1) {
-        oldNext = 0;
-      }
+    // Dots
+    const dotsContainer = document.createElement("div");
+    dotsContainer.style.display = "flex";
+    dotsContainer.style.gap = "10px";
+    meanings.forEach((_: unknown, index: number) => {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      if (index === 0) dot.classList.add("active");
+      dotsContainer.appendChild(dot);
+    });
+    controls.appendChild(dotsContainer);
 
-      // Checks and updates if slide is at the beginning/end
-      if (slide === 0) {
-        newPrevious = totalItems - 1;
-        oldPrevious = totalItems - 2;
-        oldNext = slide + 1;
-      } else if (slide === totalItems - 1) {
-        newPrevious = slide - 1;
-        newNext = 0;
-        oldNext = 1;
-      }
-      // Now we've worked out where we are and where we're going,
-      // by adding/removing classes we'll trigger the transitions.
-      // Reset old next/prev elements to default classes
-      items[oldPrevious].className = itemClassName;
-      items[oldNext].className = itemClassName;
-      // Add new classes
-      items[newPrevious].className = itemClassName + " prev";
-      items[slide].className = itemClassName + " active";
-      items[newNext].className = itemClassName + " next";
-    }
+    // Next button
+    const nextBtn = document.createElement("div");
+    nextBtn.className = "carousel__button--next";
+    const nextImg = document.createElement("img");
+    nextImg.src = next;
+    nextBtn.appendChild(nextImg);
+    controls.appendChild(nextBtn);
+
+    carousel.appendChild(controls);
   }
+
+  console.log("Generated tooltip content (DOM):", wrapper);
+  return wrapper;
 }
 
-function initCarousel() {
-  slide = 0;
-  items = document.getElementsByClassName(itemClassName);
-  dots = document.getElementsByClassName(dotsClassName);
-  totalItems = items.length;
-  setInitialClasses();
-  setEventListeners();
-  // Set moving to false so that the carousel becomes interactive
-  moving = false;
-}
+
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
-  const selection = document.getSelection();
-  const selectedText = document.getSelection()?.toString().trim();
 
-  const targetElement = event.target;
 
-  if (
-    selection?.type === "Range" &&
-    targetElement &&
-    selectedText &&
-    selectedText !== ""
-  ) {
-    if (freetalkClass.textContent) {
-      freetalkClass.textContent = rules;
-    } else {
-      freetalkClass.appendChild(document.createTextNode(rules));
-    }
+  const selection = window.getSelection();
+  const selectedText = selection?.toString().trim();
 
-    document.body.appendChild(freetalkClass);
-    //@ts-ignore
-    const innerHTML = targetElement.innerHTML;
-    const highlightedHTML = innerHTML.replace(
-      new RegExp(`(${selectedText})`, "gi"),
-      '<span id="tooltip" style="width:auto;">$1</span>'
-    );
-    //@ts-ignore
-    targetElement.innerHTML = highlightedHTML;
-    const data = await browser.runtime.sendMessage({
-      type: "openPopup",
-      payload: {
-        text: selectedText,
-      },
-    });
+  if (selection?.type === "Range" && selection.rangeCount > 0 && selectedText) {
 
-    const instance = tippy("#tooltip", {
-      content: generateTooltipContentOld(data, selectedText),
-      hideOnClick: true,
-      interactive: true,
-      allowHTML: true,
-      theme: "freetalk",
-      trigger: "manual",
-      onHidden(instance) {
-        instance.destroy();
-        let tooltipEl = document.getElementById("tooltip");
-        let parentEl = tooltipEl?.parentElement;
+    // Create Shadow DOM add CSS
+    const shadowContainer = document.createElement("div");
+    shadowContainer.id = "freetalk-tooltip-anchor"; // Not sure I need this?
+    shadowContainer.style.position = "absolute";
+    shadowContainer.style.zIndex = "10000";
+    document.body.appendChild(shadowContainer);
+    const shadowRoot = shadowContainer.attachShadow({ mode: "open" });
+    injectStyles(shadowRoot, cssRules);
 
-        let spanText = tooltipEl?.textContent;
+    // Add Tooltip's anchor div
+    const tooltipElement = document.createElement("div");
+    tooltipElement.id = "tooltip";
+    tooltipElement.style.position = "absolute";
+    shadowRoot.appendChild(tooltipElement);
 
-        parentEl?.replaceChild(
-          document.createTextNode(spanText ?? ""),
-          tooltipEl!
+    // Add Tooltip
+    try {
+      const data = await browser.runtime.sendMessage({
+        type: "openPopup",
+        payload: {
+          text: selectedText.toLowerCase(),
+        },
+      });
+
+      console.log("Received data:", data);
+
+      const tooltipHTML = generateTooltipContent(data);
+
+      const updateTooltipPosition = () => {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
+        shadowContainer.style.left = `${rect.left}px`;
+      };
+
+      const instance = tippy(tooltipElement, {
+        content: tooltipHTML,
+        hideOnClick: true,
+        trigger: "click",
+        interactive: true,
+        allowHTML: true,
+        theme: "freetalk",
+        onCreate(instance) {
+          updateTooltipPosition();
+        },
+        onHidden(instance) {
+          // instance.destroy();
+          shadowContainer.remove();
+          window.removeEventListener("scroll", updateTooltipPosition);
+          window.removeEventListener("keydown", handleEsc);
+        }
+      });
+
+      instance.show();
+      new Carousel(shadowRoot);
+
+      // ...inside your try block, after showing the tooltip...
+      const handleEsc = (e: KeyboardEvent): void => {
+        if (e.key === "Escape") {
+          shadowContainer.remove();
+          window.removeEventListener("keydown", handleEsc);
+          window.removeEventListener("scroll", updateTooltipPosition);
+        }
+      };
+
+      // Add this to prevent clicks inside the tooltip from bubbling up
+      const preventTooltipClickPropagation = (shadowRoot: ShadowRoot): void => {
+        ["click", "dblclick"].forEach(event =>
+          shadowRoot.addEventListener(event, e => e.stopPropagation())
         );
-      },
-    });
-    instance[0].show();
-    initCarousel();
+      };
+
+      preventTooltipClickPropagation(shadowRoot);
+
+      document.addEventListener("click", () => { shadowContainer.remove() });
+      window.addEventListener("keydown", handleEsc);
+      window.addEventListener("scroll", updateTooltipPosition);
+      // window.addEventListener("click", handleClickOutside);
+    } catch (error) {
+      console.error("Error sending message to background script:", error);
+      shadowContainer.remove();
+    }
   }
 });
 
-export {};
+export { };

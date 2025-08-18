@@ -1,28 +1,31 @@
-import * as browsers from 'webextension-polyfill'
-import { getMeaning } from '../helpers/freeTalkAPI';
+import * as browsers from 'webextension-polyfill';
 
-browsers.runtime.onInstalled.addListener(() => {
-    // Initialize message listener
-    browsers.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-      if (message.type === "openPopup") {
-        // Open popup
-        console.log("ACTION CALLED", message.payload.text);
-        // browsers.tabs.query({
-        //   active: true, currentWindow: true,
-        // }).then((tabs)=>{
-        //   browsers.tabs.executeScript(tabs[0].id!, {
-        //     code:"console.log('Finalllyyy!!!')"
-        //   })
-        // })
-        // console.log(await browsers.windows.getAll());
-        const result = await getMeaning(message.payload.text);
-        console.log(result);
-        // Open popup
-        // browsers.browserAction.openPopup();
-        return result;
-      }
+export const getMeaning = async (searchWord: string) => {
+  try {
+    const response = await fetch(`https://api.freetalk.fun/search-term?term=${encodeURIComponent(searchWord)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
-  });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching meaning:', error);
+    return { error: 'Failed to fetch meaning' };
+  }
+};
+
+browsers.runtime.onMessage.addListener((message) => {
+  if (message.type === "openPopup") {
+    console.log("BG ACTION CALLED", message.payload.text);
+    return getMeaning(message.payload.text);
+  }
+});
 
 
-export {}
+export { }

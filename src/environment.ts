@@ -1,1 +1,0 @@
-export const DIRECTUS_URL = "http://65.2.38.143"
