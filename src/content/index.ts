@@ -143,60 +143,76 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
   if (!meanings || meanings.length === 0) {
     const wrapper = document.createElement("div");
     wrapper.style.cssText = `
-      font-size: 16px;
+      font-size: 15px;
       color: #1f2937;
       max-width: 420px;
-      line-height: 1.5;
-      padding: 8px 0;
+      line-height: 1.6;
+      padding: 4px 0;
+      font-family: 'Product-Brand-Grotesque-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
 
-    // Main title - simpler language
+    // Main title - professional styling
     const title = document.createElement("h3");
     title.style.cssText = `
-      margin: 0 0 16px 0; 
-      font-size: 20px;
-      font-weight: bold;
-      color: #1f2937;
+      margin: 0 0 20px 0; 
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+      letter-spacing: -0.025em;
     `;
     title.textContent = `Cannot find "${displayTerm}" in our dictionary.`;
     wrapper.appendChild(title);
 
-    // Reasons section - simpler explanations
+    // Reasons section - refined typography
     const reasonsTitle = document.createElement("p");
     reasonsTitle.style.cssText = `
-      margin: 0 0 8px 0;
+      margin: 0 0 10px 0;
+      font-size: 14px;
       font-weight: 600;
-      color: #6b7280;
+      color: #4b5563;
+      letter-spacing: -0.01em;
     `;
     reasonsTitle.textContent = "This might be because:";
     wrapper.appendChild(reasonsTitle);
 
     const reasonsList = document.createElement("ul");
     reasonsList.style.cssText = `
-      margin: 0 0 20px 0;
-      padding-left: 20px;
+      margin: 0 0 24px 0;
+      padding-left: 18px;
       color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
     `;
 
     const reason1 = document.createElement("li");
-    reason1.style.cssText = "margin-bottom: 4px;";
-    reason1.textContent = "FTX is having problems right now. Try in 5 minutes!";
+    reason1.style.cssText = `
+      margin-bottom: 6px;
+      font-weight: 400;
+    `;
+    reason1.textContent = "There's an issue on the server. Try in a few minutes!";
     reasonsList.appendChild(reason1);
 
     const reason2 = document.createElement("li");
-    reason2.style.cssText = "margin-bottom: 4px;";
-    reason2.textContent = `The word "${displayTerm}" isn't in our dictionary yet.`;
+    reason2.style.cssText = `
+      margin-bottom: 6px;
+      font-weight: 400;
+    `;
+    reason2.textContent = `The term "${displayTerm}" isn't in our dictionary yet.`;
     reasonsList.appendChild(reason2);
 
     wrapper.appendChild(reasonsList);
 
-    // GitHub suggestion - much simpler
+    // Call to action - professional styling
     const suggestion = document.createElement("p");
     suggestion.style.cssText = `
       margin: 0;
-      color: #6b7280;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 400;
     `;
-    suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">Make an issue on GitHub</a> and we'll add it!`;
+    suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 500; border-bottom: 1px solid #2563eb; padding-bottom: 1px; transition: all 0.2s ease;">Make an issue on GitHub</a> and we'll add it.`;
     wrapper.appendChild(suggestion);
 
     return wrapper;
