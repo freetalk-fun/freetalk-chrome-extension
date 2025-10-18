@@ -1,8 +1,9 @@
 import * as browsers from 'webextension-polyfill';
 
 export const getMeaning = async (searchWord: string) => {
+
   try {
-    const response = await fetch(`https://api.freetalk.fun/search-term?term=${encodeURIComponent(searchWord)}`, {
+    const response = await fetch(`https://dictionary.freetalk.fun/words/${encodeURIComponent(searchWord)}.json`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -26,6 +27,5 @@ browsers.runtime.onMessage.addListener((message) => {
     return getMeaning(message.payload.text);
   }
 });
-
 
 export { }
