@@ -134,91 +134,295 @@ class Carousel {
   }
 }
 
-export function generateTooltipContent(data: any) {
-  console.log(data);
+export function generateTooltipContent(data: any, selectedWord?: string) {
+  const { term, meanings } = data;
 
-  const term = data?.term;
-  const meanings = data?.meanings;
+  // Use the saved selectedWord if term is undefined (error cases)
+  const displayTerm = term || selectedWord || "unknown word";
 
-  // word not found 
   if (!meanings || meanings.length === 0) {
-    const notFoundDiv = document.createElement("div");
-    notFoundDiv.style.textAlign = "center";
-    notFoundDiv.style.margin = "auto";
-    notFoundDiv.style.fontSize = "24px";
-    notFoundDiv.style.fontWeight = "700";
-    notFoundDiv.textContent = "This is not in the FreeTalk Dictionary!";
-    return notFoundDiv;
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = `
+      font-size: 16px;
+      color: #1f2937;
+      max-width: 420px;
+      line-height: 1.5;
+      padding: 8px 0;
+    `;
+
+    // Main title - simpler language
+    const title = document.createElement("h3");
+    title.style.cssText = `
+      margin: 0 0 16px 0; 
+      font-size: 20px;
+      font-weight: bold;
+      color: #1f2937;
+    `;
+    title.textContent = `Cannot find "${displayTerm}" in our dictionary.`;
+    wrapper.appendChild(title);
+
+    // Reasons section - simpler explanations
+    const reasonsTitle = document.createElement("p");
+    reasonsTitle.style.cssText = `
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      color: #6b7280;
+    `;
+    reasonsTitle.textContent = "This might be because:";
+    wrapper.appendChild(reasonsTitle);
+
+    const reasonsList = document.createElement("ul");
+    reasonsList.style.cssText = `
+      margin: 0 0 20px 0;
+      padding-left: 20px;
+      color: #6b7280;
+    `;
+
+    const reason1 = document.createElement("li");
+    reason1.style.cssText = "margin-bottom: 4px;";
+    reason1.textContent = "FTX is having problems right now. Try in 5 minutes!";
+    reasonsList.appendChild(reason1);
+
+    const reason2 = document.createElement("li");
+    reason2.style.cssText = "margin-bottom: 4px;";
+    reason2.textContent = `The word "${displayTerm}" isn't in our dictionary yet.`;
+    reasonsList.appendChild(reason2);
+
+    wrapper.appendChild(reasonsList);
+
+    // GitHub suggestion - much simpler
+    const suggestion = document.createElement("p");
+    suggestion.style.cssText = `
+      margin: 0;
+      color: #6b7280;
+    `;
+    suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">Make an issue on GitHub</a> and we'll add it!`;
+    wrapper.appendChild(suggestion);
+
+    return wrapper;
   }
 
-  // Carousel wrapper
+  // Use displayTerm for the main content too
+  const termToDisplay = term || displayTerm;
+
+  // Shared state for examples toggle across all meanings
+  let examplesOpen = false;
+  const allExamplesSections: { list: HTMLElement, arrow: HTMLElement }[] = [];
+
+  // Main wrapper
   const wrapper = document.createElement("div");
   wrapper.className = "carousel-wrapper";
-  wrapper.style.fontFamily = "Product-Brand-Grotesque, Roboto, Helvetica, Arial, sans-serif";
 
-
-  // Carousel
+  // Carousel container
   const carousel = document.createElement("div");
   carousel.className = "carousel";
   wrapper.appendChild(carousel);
 
-  // Slides
+  // Function to toggle all examples sections
+  const toggleAllExamples = () => {
+    examplesOpen = !examplesOpen;
+
+    allExamplesSections.forEach(({ list, arrow }) => {
+      if (examplesOpen) {
+        // Open examples
+        list.style.display = "block";
+        setTimeout(() => {
+          list.style.opacity = "1";
+        }, 10);
+        arrow.textContent = "▼";
+      } else {
+        // Close examples
+        list.style.opacity = "0";
+        setTimeout(() => {
+          list.style.display = "none";
+        }, 200);
+        arrow.textContent = "▶";
+      }
+    });
+  };
+
+  // Create carousel items for each meaning
   meanings.forEach((meaning: any, index: number) => {
-    const slide = document.createElement("div");
-    slide.className = "carousel__content";
-    if (index === 0) slide.classList.add("active");
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "carousel__content";
+    if (index === 0) contentDiv.classList.add("active");
 
-    // Header row
-    const headerRow = document.createElement("div");
-    headerRow.style.display = "flex";
-    headerRow.style.justifyContent = "space-between";
-    headerRow.style.fontWeight = "700";
+    // Header section with term and part of speech
+    const headerDiv = document.createElement("div");
+    headerDiv.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    `;
 
-    if (term) {
-      const termHeader = document.createElement("h3");
-      termHeader.style.fontSize = "22px";
-      termHeader.style.margin = "0 0 12px 0";
-      termHeader.style.color = "black";
-      termHeader.style.fontWeight = "700";
-      termHeader.textContent = term.charAt(0).toUpperCase() + term.slice(1);
-      headerRow.appendChild(termHeader);
+    // Term title
+    const title = document.createElement("h3");
+    title.textContent = termToDisplay; // Use termToDisplay instead of term
+    title.style.cssText = `
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+      color: #1f2937;
+      text-transform: capitalize;
+    `;
+    headerDiv.appendChild(title);
+
+    // Part of speech tags (if available)
+    if (meaning.pos && meaning.pos.length > 0) {
+      const posDiv = document.createElement("div");
+      posDiv.className = "pos-tags";
+      posDiv.style.cssText = `
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      `;
+
+      meaning.pos.forEach((pos: string) => {
+        const posTag = document.createElement("span");
+        posTag.textContent = pos;
+        posTag.style.cssText = `
+          display: inline-block;
+          background: #d1d5db;
+          color: #374151;
+          padding: 4px 10px;
+          border-radius: 16px;
+          font-size: 12px;
+          font-style: italic;
+          font-weight: 500;
+        `;
+        posDiv.appendChild(posTag);
+      });
+
+      headerDiv.appendChild(posDiv);
     }
 
-    const pos = document.createElement("p");
-    pos.style.fontSize = "16px";
-    pos.style.color = "black";
-    pos.style.margin = "0";
-    pos.textContent = meaning.pos;
-    headerRow.appendChild(pos);
+    contentDiv.appendChild(headerDiv);
 
-    slide.appendChild(headerRow);
+    // Explanation
+    if (meaning.explanation) {
+      const explanationDiv = document.createElement("div");
+      explanationDiv.className = "explanation";
+      explanationDiv.style.cssText = `
+        margin-bottom: 16px;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #1f2937;
+      `;
+      explanationDiv.textContent = meaning.explanation;
+      contentDiv.appendChild(explanationDiv);
+    }
 
-    // Definition
-    const def = document.createElement("p");
-    def.style.textAlign = "left";
-    def.style.fontSize = "16px";
-    def.style.lineHeight = "1.2";
-    def.style.fontWeight = "390";
-    def.style.color = "black";
-    def.style.margin = "0";
-    def.style.paddingTop = "23px";
-    def.textContent = meaning.definition;
-    slide.appendChild(def);
+    // Connotation
+    if (meaning.connotation) {
+      const connotationDiv = document.createElement("div");
+      connotationDiv.className = "connotation";
+      connotationDiv.style.cssText = `
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #6b7280;
+        font-style: italic;
+        padding: 12px 16px;
+        background: #f3f4f6;
+        border-left: 4px solid #d1d5db;
+        border-radius: 4px;
+        line-height: 1.4;
+      `;
+      connotationDiv.textContent = meaning.connotation;
+      contentDiv.appendChild(connotationDiv);
+    }
 
-    carousel.appendChild(slide);
+    // Example sentences
+    const exampleSentences = [];
+    for (let i = 1; i <= 6; i++) {
+      const sentence = meaning[`s${i}`];
+      if (sentence) {
+        exampleSentences.push(sentence);
+      }
+    }
+
+    if (exampleSentences.length > 0) {
+      const examplesSection = document.createElement("div");
+      examplesSection.style.cssText = `
+        margin-top: 16px;
+      `;
+
+      const examplesTitle = document.createElement("h4");
+      examplesTitle.textContent = "Examples:";
+      examplesTitle.style.cssText = `
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+      `;
+
+      // Add arrow icon before "Examples:"
+      const arrow = document.createElement("span");
+      arrow.textContent = "▶"; // Start with right arrow (closed)
+      arrow.style.cssText = `
+        margin-right: 8px;
+        font-size: 12px;
+        color: #6b7280;
+        transition: transform 0.2s ease;
+      `;
+      examplesTitle.insertBefore(arrow, examplesTitle.firstChild);
+
+      examplesSection.appendChild(examplesTitle);
+
+      const examplesList = document.createElement("ul");
+      examplesList.style.cssText = `
+        margin: 0;
+        padding-left: 20px;
+        list-style-type: disc;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      `;
+
+      exampleSentences.forEach((sentence: string) => {
+        const listItem = document.createElement("li");
+        listItem.style.cssText = `
+          margin-bottom: 8px;
+          font-size: 14px;
+          line-height: 1.4;
+          color: #4b5563;
+        `;
+        listItem.textContent = sentence;
+        examplesList.appendChild(listItem);
+      });
+
+      examplesSection.appendChild(examplesList);
+
+      // Store reference to this examples section
+      allExamplesSections.push({ list: examplesList, arrow });
+
+      // Add click handler that toggles ALL examples sections
+      examplesTitle.addEventListener("click", toggleAllExamples);
+
+      contentDiv.appendChild(examplesSection);
+    }
+
+    carousel.appendChild(contentDiv);
   });
 
-  // Controls (if more than one meaning)
+  // Add carousel controls if there are multiple meanings
   if (meanings.length > 1) {
     const controls = document.createElement("div");
-    controls.style.display = "flex";
-    controls.style.justifyContent = "center";
-    controls.style.alignItems = "center";
-    controls.style.position = "relative";
-    controls.style.gap = "10px";
-    controls.style.marginTop = "10px";
+    controls.className = "carousel__controls";
+    controls.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    `;
 
-    // Prev button
+    // Previous button
     const prevBtn = document.createElement("div");
     prevBtn.className = "carousel__button--prev";
     const prevImg = document.createElement("img");
@@ -226,10 +430,15 @@ export function generateTooltipContent(data: any) {
     prevBtn.appendChild(prevImg);
     controls.appendChild(prevBtn);
 
-    // Dots
+    // Dots container
     const dotsContainer = document.createElement("div");
-    dotsContainer.style.display = "flex";
-    dotsContainer.style.gap = "10px";
+    dotsContainer.className = "carousel__dots";
+    dotsContainer.style.cssText = `
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    `;
+
     meanings.forEach((_: unknown, index: number) => {
       const dot = document.createElement("div");
       dot.className = "dot";
@@ -256,12 +465,12 @@ export function generateTooltipContent(data: any) {
 
 
 document.querySelector("body")?.addEventListener("dblclick", async (event) => {
-
-
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
 
   if (selection?.type === "Range" && selection.rangeCount > 0 && selectedText) {
+    // Save the selected word for error cases
+    const savedWord = selectedText.toLowerCase();
 
     // Create Shadow DOM add CSS
     const shadowContainer = document.createElement("div");
@@ -283,13 +492,14 @@ document.querySelector("body")?.addEventListener("dblclick", async (event) => {
       const data = await browser.runtime.sendMessage({
         type: "openPopup",
         payload: {
-          text: selectedText.toLowerCase(),
+          text: savedWord,
         },
       });
 
       console.log("Received data:", data);
 
-      const tooltipHTML = generateTooltipContent(data);
+      // Pass the saved word to generateTooltipContent
+      const tooltipHTML = generateTooltipContent(data, savedWord);
 
       const updateTooltipPosition = () => {
         const range = selection.getRangeAt(0);
