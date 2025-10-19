@@ -4,11 +4,6 @@
 }
 
 @font-face {
-  font-family: 'Product-Brand-Grotesque-Regular';
-  src: url('./Brandon-font/Brandon_Grotesque_Web_Regular.ttf');
-}
-
-@font-face {
   font-family: 'Sensei-Medium';
   src: url('./Sensei-Medium.otf');
 }
@@ -20,7 +15,7 @@
 }
 
 body {
-  font-family: 'Product-Brand-Grotesque-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -94,15 +89,15 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-input:not(:checked) + .toggle-switch {
+.toggle-input:not(:checked)+.toggle-switch {
   background-color: #d1d5db;
 }
 
-.toggle-input:not(:checked) + .toggle-switch::after {
+.toggle-input:not(:checked)+.toggle-switch::after {
   transform: translateX(0);
 }
 
-.toggle-input:checked + .toggle-switch::after {
+.toggle-input:checked+.toggle-switch::after {
   transform: translateX(18px);
 }
 

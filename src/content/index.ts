@@ -1,13 +1,11 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
-import next from "../../src/assets/nextarrow.png";
-import prev from "../../src/assets/prevarrow.png";
 
 const cssRules = [
   {
     selector: '.tippy-box[data-theme="freetalk"]',
     style: {
-      fontFamily: 'Product-Brand-Grotesque-Regular, Roboto, Helvetica, sans-serif',
+      fontFamily: 'Roboto, Helvetica, Arial, sans-serif', // Removed Product-Brand-Grotesque-Regular
       backgroundColor: '#F9F9F9',
       color: '#2E2E2E',
       border: '2px solid #d9d9d9',
@@ -48,10 +46,8 @@ const cssRules = [
   {
     selector: '.carousel__button--prev, .carousel__button--next',
     style: {
-      width: '12px',
       cursor: 'pointer',
       zIndex: '10000',
-      paddingTop: '3px',
     },
   },
   {
@@ -135,92 +131,107 @@ class Carousel {
 }
 
 export function generateTooltipContent(data: any, selectedWord?: string) {
+  // Handle error responses first
+  if (data?.error) {
+    console.warn('API returned error:', data.error);
+    return createErrorContent(selectedWord || "unknown word");
+  }
+
+  // Handle missing or invalid data
+  if (!data || typeof data !== 'object') {
+    console.warn('Invalid data received:', data);
+    return createErrorContent(selectedWord || "unknown word");
+  }
+
   const { term, meanings } = data;
 
   // Use the saved selectedWord if term is undefined (error cases)
   const displayTerm = term || selectedWord || "unknown word";
 
-  if (!meanings || meanings.length === 0) {
-    const wrapper = document.createElement("div");
-    wrapper.style.cssText = `
-      font-size: 15px;
-      color: #1f2937;
-      max-width: 420px;
-      line-height: 1.6;
-      padding: 4px 0;
-      font-family: 'Product-Brand-Grotesque-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    `;
-
-    // Main title - professional styling
-    const title = document.createElement("h3");
-    title.style.cssText = `
-      margin: 0 0 20px 0; 
-      font-size: 18px;
-      font-weight: 600;
-      color: #111827;
-      line-height: 1.3;
-      letter-spacing: -0.025em;
-    `;
-    title.textContent = `Cannot find "${displayTerm}" in our dictionary.`;
-    wrapper.appendChild(title);
-
-    // Reasons section - refined typography
-    const reasonsTitle = document.createElement("p");
-    reasonsTitle.style.cssText = `
-      margin: 0 0 10px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #4b5563;
-      letter-spacing: -0.01em;
-    `;
-    reasonsTitle.textContent = "This might be because:";
-    wrapper.appendChild(reasonsTitle);
-
-    const reasonsList = document.createElement("ul");
-    reasonsList.style.cssText = `
-      margin: 0 0 24px 0;
-      padding-left: 18px;
-      color: #6b7280;
-      font-size: 14px;
-      line-height: 1.5;
-    `;
-
-    const reason1 = document.createElement("li");
-    reason1.style.cssText = `
-      margin-bottom: 6px;
-      font-weight: 400;
-    `;
-    reason1.textContent = "There's an issue on the server. Try in a few minutes!";
-    reasonsList.appendChild(reason1);
-
-    const reason2 = document.createElement("li");
-    reason2.style.cssText = `
-      margin-bottom: 6px;
-      font-weight: 400;
-    `;
-    reason2.textContent = `The term "${displayTerm}" isn't in our dictionary yet.`;
-    reasonsList.appendChild(reason2);
-
-    wrapper.appendChild(reasonsList);
-
-    // Call to action - professional styling
-    const suggestion = document.createElement("p");
-    suggestion.style.cssText = `
-      margin: 0;
-      color: #4b5563;
-      font-size: 14px;
-      line-height: 1.5;
-      font-weight: 400;
-    `;
-    suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 500; border-bottom: 1px solid #2563eb; padding-bottom: 1px; transition: all 0.2s ease;">Make an issue on GitHub</a> and we'll add it.`;
-    wrapper.appendChild(suggestion);
-
-    return wrapper;
+  // Handle case where meanings is missing or empty
+  if (!meanings || !Array.isArray(meanings) || meanings.length === 0) {
+    return createErrorContent(displayTerm);
   }
 
-  // Use displayTerm for the main content too
-  const termToDisplay = term || displayTerm;
+  // Success case - process the meanings
+  return createSuccessContent(meanings, displayTerm);
+}
 
+// Extract error content creation to separate function
+function createErrorContent(displayTerm: string) {
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    font-size: 15px;
+    color: #1f2937;
+    max-width: 420px;
+    line-height: 1.6;
+    padding: 4px 0;
+    font-family: 'Roboto, Helvetica, Arial, sans-serif'; // Removed Brandon reference
+  `;
+
+  // Main title - professional styling
+  const title = document.createElement("h3");
+  title.style.cssText = `
+    margin: 0 0 20px 0; 
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  `;
+  title.textContent = `Cannot find "${displayTerm}" in our dictionary.`;
+  wrapper.appendChild(title);
+
+  // Reasons section - refined typography
+  const reasonsTitle = document.createElement("p");
+  reasonsTitle.style.cssText = `
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    letter-spacing: -0.01em;
+  `;
+  reasonsTitle.textContent = "This might be because:";
+  wrapper.appendChild(reasonsTitle);
+
+  const reasonsList = document.createElement("ul");
+  reasonsList.style.cssText = `
+    margin: 0 0 24px 0;
+    padding-left: 18px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+  `;
+
+  const reason1 = document.createElement("li");
+  reason1.style.cssText = `margin-bottom: 6px; font-weight: 400;`;
+  reason1.textContent = "There's an issue on the server. Try in a few minutes!";
+  reasonsList.appendChild(reason1);
+
+  const reason2 = document.createElement("li");
+  reason2.style.cssText = `margin-bottom: 6px; font-weight: 400;`;
+  reason2.textContent = `The term "${displayTerm}" isn't in our dictionary yet.`;
+  reasonsList.appendChild(reason2);
+
+  wrapper.appendChild(reasonsList);
+
+  // Call to action - professional styling
+  const suggestion = document.createElement("p");
+  suggestion.style.cssText = `
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+  `;
+  suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 500; border-bottom: 1px solid #2563eb; padding-bottom: 1px; transition: all 0.2s ease;">Make an issue on GitHub</a> and we'll add it.`;
+  wrapper.appendChild(suggestion);
+
+  return wrapper;
+}
+
+// Extract success content creation (your existing carousel logic)
+function createSuccessContent(meanings: any[], termToDisplay: string) {
   // Shared state for examples toggle across all meanings
   let examplesOpen = false;
   const allExamplesSections: { list: HTMLElement, arrow: HTMLElement }[] = [];
@@ -240,14 +251,12 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
 
     allExamplesSections.forEach(({ list, arrow }) => {
       if (examplesOpen) {
-        // Open examples
         list.style.display = "block";
         setTimeout(() => {
           list.style.opacity = "1";
         }, 10);
         arrow.textContent = "▼";
       } else {
-        // Close examples
         list.style.opacity = "0";
         setTimeout(() => {
           list.style.display = "none";
@@ -269,29 +278,31 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     `;
 
-    // Term title
+    // Term title - back to original styling
     const title = document.createElement("h3");
-    title.textContent = termToDisplay; // Use termToDisplay instead of term
+    title.textContent = termToDisplay;
     title.style.cssText = `
       margin: 0;
-      font-size: 24px;
-      font-weight: bold;
-      color: #1f2937;
+      font-size: 22px;
+      font-weight: 600;
+      color: #2E2E2E;
       text-transform: capitalize;
+      line-height: 1.2;
     `;
     headerDiv.appendChild(title);
 
-    // Part of speech tags (if available)
+    // Part of speech tags - fixed height and styling
     if (meaning.pos && meaning.pos.length > 0) {
       const posDiv = document.createElement("div");
       posDiv.className = "pos-tags";
       posDiv.style.cssText = `
         display: flex;
-        gap: 6px;
+        gap: 4px;
         flex-shrink: 0;
+        align-items: center;
       `;
 
       meaning.pos.forEach((pos: string) => {
@@ -299,13 +310,15 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
         posTag.textContent = pos;
         posTag.style.cssText = `
           display: inline-block;
-          background: #d1d5db;
-          color: #374151;
-          padding: 4px 10px;
-          border-radius: 16px;
-          font-size: 12px;
+          background: #E5E7EB;
+          color: #6B7280;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 11px;
           font-style: italic;
           font-weight: 500;
+          line-height: 1.2;
+          height: fit-content;
         `;
         posDiv.appendChild(posTag);
       });
@@ -315,40 +328,41 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
 
     contentDiv.appendChild(headerDiv);
 
-    // Explanation
+    // Explanation - made more prominent
     if (meaning.explanation) {
       const explanationDiv = document.createElement("div");
       explanationDiv.className = "explanation";
       explanationDiv.style.cssText = `
         margin-bottom: 16px;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1.5;
-        color: #1f2937;
+        color: #2E2E2E;
+        font-weight: 500;
       `;
       explanationDiv.textContent = meaning.explanation;
       contentDiv.appendChild(explanationDiv);
     }
 
-    // Connotation
+    // Connotation - made less prominent
     if (meaning.connotation) {
       const connotationDiv = document.createElement("div");
       connotationDiv.className = "connotation";
       connotationDiv.style.cssText = `
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: #6b7280;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: #6B7280;
         font-style: italic;
-        padding: 12px 16px;
-        background: #f3f4f6;
-        border-left: 4px solid #d1d5db;
-        border-radius: 4px;
+        padding: 8px 12px;
+        background: #F9FAFB;
+        border-left: 3px solid #E5E7EB;
+        border-radius: 3px;
         line-height: 1.4;
       `;
       connotationDiv.textContent = meaning.connotation;
       contentDiv.appendChild(connotationDiv);
     }
 
-    // Example sentences
+    // Example sentences - keep existing logic but update styling
     const exampleSentences = [];
     for (let i = 1; i <= 6; i++) {
       const sentence = meaning[`s${i}`];
@@ -366,10 +380,10 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
       const examplesTitle = document.createElement("h4");
       examplesTitle.textContent = "Examples:";
       examplesTitle.style.cssText = `
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
-        margin-bottom: 12px;
-        color: #374151;
+        margin-bottom: 8px;
+        color: #4B5563;
         display: flex;
         align-items: center;
         cursor: pointer;
@@ -378,11 +392,11 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
 
       // Add arrow icon before "Examples:"
       const arrow = document.createElement("span");
-      arrow.textContent = "▶"; // Start with right arrow (closed)
+      arrow.textContent = "▶";
       arrow.style.cssText = `
-        margin-right: 8px;
-        font-size: 12px;
-        color: #6b7280;
+        margin-right: 6px;
+        font-size: 10px;
+        color: #6B7280;
         transition: transform 0.2s ease;
       `;
       examplesTitle.insertBefore(arrow, examplesTitle.firstChild);
@@ -392,7 +406,7 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
       const examplesList = document.createElement("ul");
       examplesList.style.cssText = `
         margin: 0;
-        padding-left: 20px;
+        padding-left: 16px;
         list-style-type: disc;
         display: none;
         opacity: 0;
@@ -402,10 +416,10 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
       exampleSentences.forEach((sentence: string) => {
         const listItem = document.createElement("li");
         listItem.style.cssText = `
-          margin-bottom: 8px;
-          font-size: 14px;
+          margin-bottom: 6px;
+          font-size: 13px;
           line-height: 1.4;
-          color: #4b5563;
+          color: #6B7280;
         `;
         listItem.textContent = sentence;
         examplesList.appendChild(listItem);
@@ -425,7 +439,7 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
     carousel.appendChild(contentDiv);
   });
 
-  // Add carousel controls if there are multiple meanings
+  // Add carousel controls if there are multiple meanings - MUCH cleaner styling
   if (meanings.length > 1) {
     const controls = document.createElement("div");
     controls.className = "carousel__controls";
@@ -433,25 +447,45 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 1px solid #E5E7EB;
     `;
 
-    // Previous button
+    // Previous button - cleaner, simpler styling
     const prevBtn = document.createElement("div");
     prevBtn.className = "carousel__button--prev";
-    const prevImg = document.createElement("img");
-    prevImg.src = prev;
-    prevBtn.appendChild(prevImg);
+    prevBtn.style.cssText = `
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      font-size: 12px;
+      user-select: none;
+      transition: color 0.2s ease;
+    `;
+    prevBtn.textContent = "◀";
+    prevBtn.title = "Previous meaning";
+
+    // Simple hover effect
+    prevBtn.addEventListener('mouseenter', () => {
+      prevBtn.style.color = '#6B7280';
+    });
+    prevBtn.addEventListener('mouseleave', () => {
+      prevBtn.style.color = '#9CA3AF';
+    });
+
     controls.appendChild(prevBtn);
 
-    // Dots container
+    // Dots container - keep existing
     const dotsContainer = document.createElement("div");
     dotsContainer.className = "carousel__dots";
     dotsContainer.style.cssText = `
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     `;
 
@@ -463,12 +497,32 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
     });
     controls.appendChild(dotsContainer);
 
-    // Next button
+    // Next button - matching previous button
     const nextBtn = document.createElement("div");
     nextBtn.className = "carousel__button--next";
-    const nextImg = document.createElement("img");
-    nextImg.src = next;
-    nextBtn.appendChild(nextImg);
+    nextBtn.style.cssText = `
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      font-size: 12px;
+      user-select: none;
+      transition: color 0.2s ease;
+    `;
+    nextBtn.textContent = "▶";
+    nextBtn.title = "Next meaning";
+
+    // Simple hover effect
+    nextBtn.addEventListener('mouseenter', () => {
+      nextBtn.style.color = '#6B7280';
+    });
+    nextBtn.addEventListener('mouseleave', () => {
+      nextBtn.style.color = '#9CA3AF';
+    });
+
     controls.appendChild(nextBtn);
 
     carousel.appendChild(controls);

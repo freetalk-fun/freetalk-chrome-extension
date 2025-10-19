@@ -1,6 +1,7 @@
 {
   "name": "freetalk-dictionary-extension",
   "version": "0.1.0",
+  "type": "module",
   "description": "Chrome extension that provides instant word definitions on double-click",
   "private": true,
   "dependencies": {

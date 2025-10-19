@@ -1,20 +1,20 @@
-const esbuild = require('esbuild');
-const { copy } = require('esbuild-plugin-copy');
-const fs = require('fs');
-const path = require('path');
+import { build } from 'esbuild';
+import { copy } from 'esbuild-plugin-copy';
+import { existsSync, rmSync, mkdirSync, copyFileSync, cpSync } from 'fs';
+import { join } from 'path';
 
 // Clean build directory
-if (fs.existsSync('./build')) {
-  fs.rmSync('./build', { recursive: true });
+if (existsSync('./build')) {
+  rmSync('./build', { recursive: true });
 }
 
 // Create build directories
-fs.mkdirSync('./build', { recursive: true });
-fs.mkdirSync('./build/static/js', { recursive: true });
-fs.mkdirSync('./build/static/media', { recursive: true });
+mkdirSync('./build', { recursive: true });
+mkdirSync('./build/static/js', { recursive: true });
+mkdirSync('./build/static/media', { recursive: true });
 
 // Build TypeScript files
-esbuild.build({
+build({
   entryPoints: {
     'background': 'src/background/index.ts',
     'content': 'src/content/index.ts',
@@ -46,19 +46,13 @@ esbuild.build({
   ];
 
   publicFiles.forEach(file => {
-    const src = path.join('./public', file);
-    const dest = path.join('./build', file);
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, dest);
+    const src = join('./public', file);
+    const dest = join('./build', file);
+    if (existsSync(src)) {
+      copyFileSync(src, dest);
       console.log(`✓ Copied ${file}`);
     }
   });
-
-  // Copy Brandon font directory
-  if (fs.existsSync('./public/Brandon-font')) {
-    fs.cpSync('./public/Brandon-font', './build/Brandon-font', { recursive: true });
-    console.log('✓ Copied Brandon-font directory');
-  }
 
   console.log('\n✓ Build complete!');
   console.log('Build output: ./build');
