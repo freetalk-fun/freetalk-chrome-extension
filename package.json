@@ -3,53 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
-    "@tippyjs/react": "^4.2.6",
-    "@types/jest": "^27.0.1",
     "@types/node": "^16.7.13",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "axios": "^1.6.8",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1",
     "tippy.js": "^6.3.7",
     "typescript": "^4.4.2",
-    "web-vitals": "^2.1.0",
     "webextension-polyfill": "^0.11.0"
   },
   "scripts": {
-    "build": "cross-env INLINE_RUNTIME_CHUNK=false react-app-rewired build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "build": "node build.js"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.267",
-    "@types/js-cookie": "^3.0.6",
     "@types/webextension-polyfill": "^0.10.7",
-    "autoprefixer": "^10.4.19",
-    "cross-env": "^7.0.3",
-    "customize-cra": "^1.0.0",
-    "postcss": "^8.4.38",
-    "react-app-rewired": "^2.2.1",
-    "tailwindcss": "^3.4.3"
+    "esbuild": "^0.25.11",
+    "esbuild-plugin-copy": "^2.1.1"
   }
 }
