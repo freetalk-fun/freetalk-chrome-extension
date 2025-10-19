@@ -20,7 +20,7 @@
       "js": ["./static/js/content.js", "popup.js"]
     }
   ],
-  "permissions": [ "storage", "activeTab", "tabs"],
+  "permissions": [ "storage"],
   "host_permissions": ["https://dictionary.freetalk.fun/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
