@@ -1,46 +1,71 @@
-# Getting Started with Create React App
+# FreeTalk Dictionary Chrome Extension
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A Chrome extension that provides instant word definitions when you double-click any word on a webpage.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔍 Double-click any word to get its definition
+- 📚 Multiple meanings and examples for each word
+- 🎨 Clean, professional tooltip interface
+- ⚙️ Toggle the dictionary on/off from the extension popup
 
-### `yarn start`
+## Development
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Prerequisites
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- Node.js (v16 or higher)
+- npm or yarn
 
-### `yarn test`
+### Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+```
 
-### `yarn build`
+### Building
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Build the extension for production:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+This will create a `build/` directory with all the extension files ready to load into Chrome.
 
-### `yarn eject`
+### Loading the Extension in Chrome
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Build the extension using `npm run build`
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" in the top right
+4. Click "Load unpacked" and select the `build/` directory
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Project Structure
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+├── src/
+│   ├── background/     # Background service worker
+│   ├── content/        # Content script (runs on web pages)
+│   └── assets/         # Images and static assets
+├── public/             # Static files copied to build
+│   ├── index.html      # Extension popup HTML
+│   ├── popup.js        # Popup functionality
+│   ├── popup.css       # Popup styles
+│   └── manifest.json   # Extension manifest
+├── build.js            # Build script using esbuild
+└── package.json
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Tech Stack
 
-## Learn More
+- TypeScript
+- esbuild (fast bundler)
+- Tippy.js (tooltips)
+- webextension-polyfill (cross-browser compatibility)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Contributing
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+See LICENSE file for details.
