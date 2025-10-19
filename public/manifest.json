@@ -17,11 +17,11 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["./static/js/content.js"]
+      "js": ["./static/js/content.js", "popup.js"]
     }
   ],
-  "permissions": [],
-  "host_permissions": ["https://api.freetalk.fun/*"],
+  "permissions": [ "storage", "activeTab", "tabs"],
+  "host_permissions": ["https://dictionary.freetalk.fun/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
   }
