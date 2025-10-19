@@ -478,9 +478,21 @@ export function generateTooltipContent(data: any, selectedWord?: string) {
   return wrapper;
 }
 
+document.addEventListener("dblclick", async (event) => {
+  // Check state fresh each time - this is the ONLY place we check
+  try {
+    const result = await chrome.storage.local.get(['dictionaryEnabled']);
+    const isEnabled = result.dictionaryEnabled !== false;
 
+    if (!isEnabled) {
+      console.log('Dictionary disabled, skipping tooltip');
+      return;
+    }
+  } catch (error) {
+    console.log('Storage check failed, defaulting to enabled');
+    // Continue with tooltip if storage fails
+  }
 
-document.querySelector("body")?.addEventListener("dblclick", async (event) => {
   const selection = window.getSelection();
   const selectedText = selection?.toString().trim();
 

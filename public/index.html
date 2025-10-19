@@ -1,16 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FreeTalk Dictionary</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="popup">
-    <h1>FreeTalk Dictionary</h1>
-    <p>Double-click any word on a webpage to get its definition!</p>
-    <p>Brought to you by: <a href="https://freetalk.fun" target="_blank" rel="noopener noreferrer">FreeTalk.fun</a></p>
+  <div class="popup" id="popup-container" style="opacity: 0; transition: opacity 0.1s ease;">
+    <h1>FTX SETTINGS</h1>
+    <div class="toggle-section">
+      <div class="toggle-container">
+        <input type="checkbox" id="dictionary-toggle" class="toggle-input">
+        <label for="dictionary-toggle" class="toggle-switch"></label>
+      </div>
+      <span class="toggle-label">Toggle Dictionary active / inactive</span>
+    </div>
+
+    <div class="footer">
+      <span class="powered-by">Powered by:</span>
+      <a href="https://www.freetalk.fun" target="_blank" rel="noopener noreferrer" class="brand-link">
+        <span class="brand">
+          <span class="brand-freetalk">FREETALK</span><span class="brand-fun">.fun</span>
+        </span>
+      </a>
+      <span class="separator">||</span>
+      <a href="https://github.com/freetalk-fun/freetalk-chrome-extension" target="_blank" rel="noopener noreferrer" class="github-link">
+        View on GitHub
+      </a>
+    </div>
   </div>
+  
+  <script src="popup.js"></script>
 </body>
 </html>
