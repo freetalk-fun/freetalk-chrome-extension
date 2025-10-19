@@ -1,31 +1,58 @@
 import * as browsers from 'webextension-polyfill';
 
 export const getMeaning = async (searchWord: string) => {
+  console.log('API call started for:', searchWord);
 
   try {
-    const response = await fetch(`https://dictionary.freetalk.fun/words/${encodeURIComponent(searchWord)}.json`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(`https://dictionary.freetalk.fun/words/${searchWord}.json`);
+    console.log('Response status:', response.status);
 
     if (!response.ok) {
-      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Response data:', data);
+
+    // Validate the response structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response format');
+    }
+
+    return data;
   } catch (error) {
-    console.error('Error fetching meaning:', error);
-    return { error: 'Failed to fetch meaning' };
+    console.error('API call failed:', error);
+
+    // Return a proper error object that matches expected structure
+    return {
+      error: `Failed to fetch meaning: ${error.message}`,
+      term: searchWord,
+      meanings: []
+    };
   }
 };
 
-browsers.runtime.onMessage.addListener((message) => {
+// Handle messages from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('Background received message:', message);
+
   if (message.type === "openPopup") {
-    console.log("BG ACTION CALLED", message.payload.text);
-    return getMeaning(message.payload.text);
+    getMeaning(message.payload.text)
+      .then(result => {
+        console.log('Sending result to content script:', result);
+        sendResponse(result);
+      })
+      .catch(error => {
+        console.error('Error in getMeaning:', error);
+        sendResponse({
+          error: 'Failed to get meaning',
+          term: message.payload.text,
+          meanings: []
+        });
+      });
+
+    return true; // Keep message channel open for async response
   }
 });
 
-export { }
+export { };
