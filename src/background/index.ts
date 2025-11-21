@@ -4,7 +4,7 @@ export const getMeaning = async (searchWord: string) => {
   console.log('API call started for:', searchWord);
 
   try {
-    const response = await fetch(`https://dictionary.freetalk.fun/words/${searchWord}.json`);
+    const response = await fetch(`https://dictionary.freetalk.fun/v3/words/${searchWord}.json`);
     console.log('Response status:', response.status);
 
     if (!response.ok) {
@@ -23,9 +23,11 @@ export const getMeaning = async (searchWord: string) => {
   } catch (error) {
     console.error('API call failed:', error);
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
     // Return a proper error object that matches expected structure
     return {
-      error: `Failed to fetch meaning: ${error.message}`,
+      error: `Failed to fetch meaning: ${errorMessage}`,
       term: searchWord,
       meanings: []
     };

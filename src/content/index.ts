@@ -281,6 +281,14 @@ function createSuccessContent(meanings: any[], termToDisplay: string) {
       margin-bottom: 16px;
     `;
 
+    // Left side: Term title with audio button
+    const titleContainer = document.createElement("div");
+    titleContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    `;
+
     // Term title - back to original styling
     const title = document.createElement("h3");
     title.textContent = termToDisplay;
@@ -292,7 +300,76 @@ function createSuccessContent(meanings: any[], termToDisplay: string) {
       text-transform: capitalize;
       line-height: 1.2;
     `;
-    headerDiv.appendChild(title);
+    titleContainer.appendChild(title);
+
+    // Add speaker icon if audio is available
+    if (meaning.audio_url) {
+      const audioButton = document.createElement("button");
+      audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #374151;"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"></path><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"></path></svg>`;
+      audioButton.title = `Play pronunciation${meaning.ipa ? ': ' + meaning.ipa : ''}`;
+      audioButton.style.cssText = `
+        background: #F3F4F6;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      `;
+
+      // Preload audio immediately
+      const audioUrl = `https://dictionary.freetalk.fun/v3/words/${meaning.audio_url}`;
+      const audio = new Audio(audioUrl);
+      audio.preload = 'auto';
+      console.log('Preloading audio from:', audioUrl);
+
+      audioButton.addEventListener('mouseenter', () => {
+        audioButton.style.background = '#E5E7EB';
+      });
+      audioButton.addEventListener('mouseleave', () => {
+        audioButton.style.background = '#F3F4F6';
+      });
+
+      audioButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        audioButton.style.background = '#D1D5DB';
+        
+        audio.play().catch(error => {
+          console.error('Audio playback failed:', error);
+          audioButton.style.background = '#FEF2F2';
+          audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #DC2626;"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg>`;
+          setTimeout(() => {
+            audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #374151;"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"></path><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"></path></svg>`;
+            audioButton.style.background = '#F3F4F6';
+          }, 2000);
+        });
+      });
+
+      audio.addEventListener('ended', () => {
+        audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #374151;"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"></path><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"></path></svg>`;
+        audioButton.style.background = '#F3F4F6';
+      });
+
+      audio.addEventListener('error', () => {
+        console.error('Audio failed to load');
+        audioButton.style.background = '#FEF2F2';
+        audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #DC2626;"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg>`;
+        setTimeout(() => {
+          audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: #374151;"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z"></path><path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z"></path></svg>`;
+          audioButton.style.background = '#F3F4F6';
+        }, 2000);
+      });
+
+      titleContainer.appendChild(audioButton);
+    }
+
+    headerDiv.appendChild(titleContainer);
 
     // Part of speech tags - fixed height and styling
     if (meaning.pos && meaning.pos.length > 0) {
@@ -526,7 +603,7 @@ function createSuccessContent(meanings: any[], termToDisplay: string) {
     controls.appendChild(nextBtn);
 
     carousel.appendChild(controls);
-  }
+  } 
 
   console.log("Generated tooltip content (DOM):", wrapper);
   return wrapper;
@@ -556,7 +633,6 @@ document.addEventListener("dblclick", async (event) => {
 
     // Create Shadow DOM add CSS
     const shadowContainer = document.createElement("div");
-    shadowContainer.id = "freetalk-tooltip-anchor"; // Not sure I need this?
     shadowContainer.style.position = "absolute";
     shadowContainer.style.zIndex = "10000";
     document.body.appendChild(shadowContainer);
@@ -601,8 +677,9 @@ document.addEventListener("dblclick", async (event) => {
           updateTooltipPosition();
         },
         onHidden(instance) {
-          // instance.destroy();
+          instance.destroy();
           shadowContainer.remove();
+          document.removeEventListener("click", handleClickOutside);
           window.removeEventListener("scroll", updateTooltipPosition);
           window.removeEventListener("keydown", handleEsc);
         }
@@ -611,28 +688,37 @@ document.addEventListener("dblclick", async (event) => {
       instance.show();
       new Carousel(shadowRoot);
 
-      // ...inside your try block, after showing the tooltip...
+      // Cleanup function to remove tooltip and all listeners
+      const cleanupTooltip = () => {
+        shadowContainer.remove();
+        document.removeEventListener("click", handleClickOutside);
+        window.removeEventListener("keydown", handleEsc);
+        window.removeEventListener("scroll", updateTooltipPosition);
+      };
+
+      // Handle ESC key
       const handleEsc = (e: KeyboardEvent): void => {
         if (e.key === "Escape") {
-          shadowContainer.remove();
-          window.removeEventListener("keydown", handleEsc);
-          window.removeEventListener("scroll", updateTooltipPosition);
+          cleanupTooltip();
         }
       };
 
-      // Add this to prevent clicks inside the tooltip from bubbling up
-      const preventTooltipClickPropagation = (shadowRoot: ShadowRoot): void => {
-        ["click", "dblclick"].forEach(event =>
-          shadowRoot.addEventListener(event, e => e.stopPropagation())
-        );
+      // Handle clicks outside the tooltip
+      const handleClickOutside = (e: MouseEvent): void => {
+        if (!shadowContainer.contains(e.target as Node)) {
+          cleanupTooltip();
+        }
       };
 
-      preventTooltipClickPropagation(shadowRoot);
+      // Prevent clicks inside the tooltip from bubbling up
+      ["click", "dblclick"].forEach(event =>
+        shadowRoot.addEventListener(event, e => e.stopPropagation())
+      );
 
-      document.addEventListener("click", () => { shadowContainer.remove() });
+      // Add event listeners
+      document.addEventListener("click", handleClickOutside);
       window.addEventListener("keydown", handleEsc);
       window.addEventListener("scroll", updateTooltipPosition);
-      // window.addEventListener("click", handleClickOutside);
     } catch (error) {
       console.error("Error sending message to background script:", error);
       shadowContainer.remove();
