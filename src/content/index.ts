@@ -645,6 +645,12 @@ document.addEventListener("dblclick", async (event) => {
       let cleanupRef: (() => void) | null = null;
 
       const updateTooltipPosition = () => {
+        // Validate selection is still valid before accessing range
+        if (!selection || selection.rangeCount === 0) {
+          if (cleanupRef) cleanupRef();
+          return;
+        }
+        
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         
