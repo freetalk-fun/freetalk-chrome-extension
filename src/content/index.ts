@@ -641,9 +641,20 @@ document.addEventListener("dblclick", async (event) => {
       // Pass the saved word to generateTooltipContent
       const tooltipHTML = generateTooltipContent(data, savedWord);
 
+      // Reference to cleanup function, set after it's defined
+      let cleanupRef: (() => void) | null = null;
+
       const updateTooltipPosition = () => {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
+        
+        // Check if the word is scrolled off screen
+        const isOffScreen = rect.bottom < 0 || rect.top > window.innerHeight;
+        if (isOffScreen && cleanupRef) {
+          cleanupRef();
+          return;
+        }
+        
         shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
         shadowContainer.style.left = `${rect.left}px`;
       };
@@ -677,6 +688,9 @@ document.addEventListener("dblclick", async (event) => {
         window.removeEventListener("keydown", handleEsc);
         window.removeEventListener("scroll", updateTooltipPosition);
       };
+      
+      // Set cleanup reference for scroll handler to use
+      cleanupRef = cleanupTooltip;
 
       // Handle ESC key
       const handleEsc = (e: KeyboardEvent): void => {
