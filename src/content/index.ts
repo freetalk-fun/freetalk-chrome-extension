@@ -162,70 +162,52 @@ function createErrorContent(displayTerm: string) {
   const wrapper = document.createElement("div");
   wrapper.style.cssText = `
     font-size: 15px;
-    color: #1f2937;
+    color: #2E2E2E;
     max-width: 420px;
     line-height: 1.6;
-    padding: 4px 0;
-    font-family: 'Roboto, Helvetica, Arial, sans-serif'; // Removed Brandon reference
+    padding: 0;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
   `;
 
-  // Main title - professional styling
+  // Main title matching success content style
   const title = document.createElement("h3");
   title.style.cssText = `
-    margin: 0 0 20px 0; 
-    font-size: 18px;
+    margin: 0 0 16px 0; 
+    font-size: 22px;
     font-weight: 600;
-    color: #111827;
-    line-height: 1.3;
-    letter-spacing: -0.025em;
+    color: #2E2E2E;
+    line-height: 1.2;
   `;
-  title.textContent = `Cannot find "${displayTerm}" in our dictionary.`;
+  title.textContent = displayTerm;
   wrapper.appendChild(title);
 
-  // Reasons section - refined typography
-  const reasonsTitle = document.createElement("p");
-  reasonsTitle.style.cssText = `
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #4b5563;
-    letter-spacing: -0.01em;
-  `;
-  reasonsTitle.textContent = "This might be because:";
-  wrapper.appendChild(reasonsTitle);
-
-  const reasonsList = document.createElement("ul");
-  reasonsList.style.cssText = `
-    margin: 0 0 24px 0;
-    padding-left: 18px;
-    color: #6b7280;
-    font-size: 14px;
+  // Error message section
+  const errorMessage = document.createElement("div");
+  errorMessage.style.cssText = `
+    margin-bottom: 16px;
+    font-size: 15px;
     line-height: 1.5;
+    color: #2E2E2E;
+    font-weight: 500;
   `;
+  errorMessage.textContent = "Word not found in dictionary";
+  wrapper.appendChild(errorMessage);
 
-  const reason1 = document.createElement("li");
-  reason1.style.cssText = `margin-bottom: 6px; font-weight: 400;`;
-  reason1.textContent = "There's an issue on the server. Try in a few minutes!";
-  reasonsList.appendChild(reason1);
-
-  const reason2 = document.createElement("li");
-  reason2.style.cssText = `margin-bottom: 6px; font-weight: 400;`;
-  reason2.textContent = `The term "${displayTerm}" isn't in our dictionary yet.`;
-  reasonsList.appendChild(reason2);
-
-  wrapper.appendChild(reasonsList);
-
-  // Call to action - professional styling
-  const suggestion = document.createElement("p");
-  suggestion.style.cssText = `
-    margin: 0;
-    color: #4b5563;
-    font-size: 14px;
-    line-height: 1.5;
-    font-weight: 400;
+  // Reasons section in connotation style
+  const reasonsDiv = document.createElement("div");
+  reasonsDiv.style.cssText = `
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #6B7280;
+    font-style: italic;
+    padding: 8px 12px;
+    background: #F9FAFB;
+    border-left: 3px solid #E5E7EB;
+    border-radius: 3px;
+    line-height: 1.4;
   `;
-  suggestion.innerHTML = `Know this word? <a href="https://github.com/freetalk-fun/freetalk-dictionary-v2/issues" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 500; border-bottom: 1px solid #2563eb; padding-bottom: 1px; transition: all 0.2s ease;">Make an issue on GitHub</a> and we'll add it.`;
-  wrapper.appendChild(suggestion);
+  reasonsDiv.textContent = `This might be because there's an issue on the server, or "${displayTerm}" isn't in our dictionary yet. We will try to add it soon!`;
+  wrapper.appendChild(reasonsDiv);
 
   return wrapper;
 }
@@ -389,12 +371,12 @@ function createSuccessContent(meanings: any[], termToDisplay: string) {
           display: inline-block;
           background: #E5E7EB;
           color: #6B7280;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 11px;
+          padding: 4px 12px;
+          border-radius: 14px;
+          font-size: 13px;
           font-style: italic;
           font-weight: 500;
-          line-height: 1.2;
+          line-height: 1.3;
           height: fit-content;
         `;
         posDiv.appendChild(posTag);
