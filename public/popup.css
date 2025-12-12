@@ -22,7 +22,7 @@ body {
   padding: 0;
   width: 380px;
   height: 220px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #f5f5f5;
   color: #333;
 }
 
@@ -41,7 +41,7 @@ body {
   font-size: 24px;
   letter-spacing: 1px;
   margin-bottom: 4px;
-  color: #ffffff;
+  color: #333333;
 }
 
 .logo-freetalk {
@@ -54,7 +54,7 @@ body {
 
 .subtitle {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #666666;
   font-weight: 400;
 }
 
@@ -159,13 +159,13 @@ body {
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #666666;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer-link:hover {
-  color: #ffffff;
+  color: #333333;
 }
 
 .footer-link svg {
@@ -175,6 +175,6 @@ body {
 }
 
 .footer-divider {
-  color: rgba(255, 255, 255, 0.4);
+  color: #999999;
   font-size: 12px;
 }
