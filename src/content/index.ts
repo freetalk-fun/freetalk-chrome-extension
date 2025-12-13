@@ -677,6 +677,24 @@ document.addEventListener("dblclick", async (event) => {
         theme: "freetalk",
         placement: "top",
         offset: [0, TOOLTIP_VERTICAL_OFFSET],
+        // Enable flip to switch placement when there's not enough space
+        popperOptions: {
+          modifiers: [
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['bottom', 'right', 'left'],
+              },
+            },
+            {
+              name: 'preventOverflow',
+              options: {
+                boundary: 'viewport',
+                padding: 10,
+              },
+            },
+          ],
+        },
         onCreate(instance) {
           updateTooltipPosition();
         },
