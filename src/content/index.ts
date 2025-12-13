@@ -664,7 +664,8 @@ document.addEventListener("dblclick", async (event) => {
           return;
         }
         
-        shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
+        // Position anchor at the word's location - let tippy handle offset via its offset option
+        shadowContainer.style.top = `${rect.top + window.scrollY}px`;
         shadowContainer.style.left = `${rect.left}px`;
       };
 
