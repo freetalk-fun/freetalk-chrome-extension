@@ -2,7 +2,7 @@ import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
 
 // Vertical offset in pixels between tooltip and highlighted word to prevent overlap
-const TOOLTIP_VERTICAL_OFFSET = 15;
+const TOOLTIP_VERTICAL_OFFSET = 25;
 
 const cssRules = [
   {
