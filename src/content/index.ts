@@ -1,6 +1,9 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
 
+// Vertical offset in pixels between tooltip and highlighted word to prevent overlap
+const TOOLTIP_VERTICAL_OFFSET = 10;
+
 const cssRules = [
   {
     selector: '.tippy-box[data-theme="freetalk"]',
@@ -672,6 +675,8 @@ document.addEventListener("dblclick", async (event) => {
         interactive: true,
         allowHTML: true,
         theme: "freetalk",
+        placement: "top",
+        offset: [0, TOOLTIP_VERTICAL_OFFSET],
         onCreate(instance) {
           updateTooltipPosition();
         },
