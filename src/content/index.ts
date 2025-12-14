@@ -1,6 +1,8 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
 
+
+
 const cssRules = [
   {
     selector: '.tippy-box[data-theme="freetalk"]',
@@ -641,11 +643,30 @@ document.addEventListener("dblclick", async (event) => {
       // Pass the saved word to generateTooltipContent
       const tooltipHTML = generateTooltipContent(data, savedWord);
 
+      // Reference to cleanup function, set after it's defined
+      let cleanupRef: (() => void) | null = null;
+
       const updateTooltipPosition = () => {
+        // Validate selection is still valid before accessing range
+        if (!selection || selection.rangeCount === 0) {
+          if (cleanupRef) cleanupRef();
+          return;
+        }
+        
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        shadowContainer.style.top = `${rect.top + window.scrollY - 25}px`;
-        shadowContainer.style.left = `${rect.left}px`;
+        
+        // Check if the word is scrolled off screen
+        const isOffScreen = rect.bottom < 0 || rect.top > window.innerHeight;
+        if (isOffScreen && cleanupRef) {
+          cleanupRef();
+          return;
+        }
+        
+        // Position anchor at the vertical center of the word for consistent spacing
+        const verticalCenter = rect.top + (rect.height / 2);
+        shadowContainer.style.top = `${verticalCenter + window.scrollY}px`;
+        shadowContainer.style.left = `${rect.left + (rect.width / 2)}px`;
       };
 
       const instance = tippy(tooltipElement, {
@@ -655,6 +676,26 @@ document.addEventListener("dblclick", async (event) => {
         interactive: true,
         allowHTML: true,
         theme: "freetalk",
+        placement: "top",
+        offset: [0, 25],
+        // Enable flip to switch placement when there's not enough space
+        popperOptions: {
+          modifiers: [
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['bottom', 'right', 'left'],
+              },
+            },
+            {
+              name: 'preventOverflow',
+              options: {
+                boundary: 'viewport',
+                padding: 10,
+              },
+            },
+          ],
+        },
         onCreate(instance) {
           updateTooltipPosition();
         },
@@ -677,6 +718,9 @@ document.addEventListener("dblclick", async (event) => {
         window.removeEventListener("keydown", handleEsc);
         window.removeEventListener("scroll", updateTooltipPosition);
       };
+      
+      // Set cleanup reference for scroll handler to use
+      cleanupRef = cleanupTooltip;
 
       // Handle ESC key
       const handleEsc = (e: KeyboardEvent): void => {
