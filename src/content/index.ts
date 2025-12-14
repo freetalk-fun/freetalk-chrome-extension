@@ -1,8 +1,7 @@
 import * as browser from "webextension-polyfill";
 import tippy from "tippy.js";
 
-// Vertical offset in pixels between tooltip and highlighted word to prevent overlap
-const TOOLTIP_VERTICAL_OFFSET = 25;
+
 
 const cssRules = [
   {
@@ -664,9 +663,10 @@ document.addEventListener("dblclick", async (event) => {
           return;
         }
         
-        // Position anchor at the word's location - let tippy handle offset via its offset option
-        shadowContainer.style.top = `${rect.top + window.scrollY}px`;
-        shadowContainer.style.left = `${rect.left}px`;
+        // Position anchor at the vertical center of the word for consistent spacing
+        const verticalCenter = rect.top + (rect.height / 2);
+        shadowContainer.style.top = `${verticalCenter + window.scrollY}px`;
+        shadowContainer.style.left = `${rect.left + (rect.width / 2)}px`;
       };
 
       const instance = tippy(tooltipElement, {
@@ -677,7 +677,7 @@ document.addEventListener("dblclick", async (event) => {
         allowHTML: true,
         theme: "freetalk",
         placement: "top",
-        offset: [0, TOOLTIP_VERTICAL_OFFSET],
+        offset: [0, 25],
         // Enable flip to switch placement when there's not enough space
         popperOptions: {
           modifiers: [
