@@ -37,7 +37,6 @@ build({
     'popup.js',
     'popup.css',
     'manifest.json',
-    'favicon.ico',
     'favicon32.png',
     'favicon48.png',
     'favicon128.png',

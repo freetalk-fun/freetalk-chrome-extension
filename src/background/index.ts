@@ -1,5 +1,3 @@
-import * as browsers from 'webextension-polyfill';
-
 export const getMeaning = async (searchWord: string) => {
   console.log('API call started for:', searchWord);
 

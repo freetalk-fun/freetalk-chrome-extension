@@ -44,8 +44,7 @@ This will create a `build/` directory with all the extension files ready to load
 ```
 ├── src/
 │   ├── background/     # Background service worker
-│   ├── content/        # Content script (runs on web pages)
-│   └── assets/         # Images and static assets
+│   └── content/        # Content script (runs on web pages)
 ├── public/             # Static files copied to build
 │   ├── index.html      # Extension popup HTML
 │   ├── popup.js        # Popup functionality
